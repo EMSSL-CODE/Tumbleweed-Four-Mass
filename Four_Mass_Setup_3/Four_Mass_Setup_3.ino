@@ -1,7 +1,7 @@
 // PAURAV; FOUR MASS TUMBLEWEED ROLLING
-// 24th JAN, 2018
-// Initial Basic code for verifying Stepper and LIDAR working
-// Accelerometer, XBee, Limit Switches not incorporated
+// 28th JAN, 2018
+// Main Code
+// With Accelerometer and Limit Switches
 
 #include <Wire.h>
 #include <LIDARLite.h>
@@ -489,11 +489,32 @@ void read_lidars()
 
 
 
+//void init_pid_controls(pidInfo &p1, pidInfo &p2)
+//***********************************************
 
+//void control_mass(pidInfo &control, lidarInfo &sensor, motorInfo &motor)
+//***********************************************************************
 
+//void init_angular_data(angleData &data)
+//***********************************
 
+//void calculate_angular_data()
+//*************************
 
+//void init accelerometer()
+//**********************
 
+//void accell()
+//*********************
+
+//int readaxis(int axisPins)
+//*************************
+
+// void setpoint_from_angle()
+//**************************
+
+// void printfunc()
+// ******************
 
 
 

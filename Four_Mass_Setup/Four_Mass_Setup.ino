@@ -1,5 +1,8 @@
 // PAURAV; FOUR MASS TUMBLEWEED ROLLING
+<<<<<<< HEAD
 // Small Line added to verify GIT Working
+=======
+>>>>>>> 6f87dfb658c39a3aeddeba8f51123a1f42718757
 // 24th JAN, 2018
 // Initial Basic code for verifying Stepper and LIDAR working
 // Accelerometer, XBee, Limit Switches not incorporated
@@ -8,7 +11,11 @@
 #include <LIDARLite.h>
 #include <stdarg.h>
 #include <math.h>  
+<<<<<<< HEAD
 #include <Servo.h>
+=======
+
+>>>>>>> 6f87dfb658c39a3aeddeba8f51123a1f42718757
 // Setpoint Angular Velocity
 //*******************************
 
