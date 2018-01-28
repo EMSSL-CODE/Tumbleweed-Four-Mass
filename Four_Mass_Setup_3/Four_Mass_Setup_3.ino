@@ -3,6 +3,8 @@
 // Main Code
 // With Accelerometer and Limit Switches
 
+//************#### Determine Motor direction
+
 #include <Wire.h>
 #include <LIDARLite.h>
 #include <stdarg.h>
@@ -105,10 +107,49 @@ struct motorInfo
 };
 
 //PID InfoStruct
-//***************
+struct pidInfo
+{
+  int pt;                            // previoustime
+  int ct;                            // previous time
+  int dt;                            // time delta
+  float ce;                          // current error
+  float pe;                          // previous error
+  float sp;                          // setpoint
+  float p;                           // proportional control
+  float i;                           // integral control
+  float d;                           // derivative control
+  float u;                           // control signal
+  float kp;                          // propotional gain
+  float ki;                          // integral gain
+  float kd;                          // derivative gain
+};
+
 
 //Angle Data Struct
-//***************
+struct angleData
+{
+  float curr_angle;
+  float curr_time;
+  float prev_angle;
+  float prev_time;
+  float next_angle;
+  float velocity;
+  float acceleration;
+  
+  // 10 angle values for moving average
+  float a1;
+  float a2;
+  float a3;
+  float a4;
+  float a5;
+  float a6;
+  float a7;
+  float a8;
+  float a9;
+  float a0;
+  int cntr;
+
+};
 
 //Global Variables
 lidarInfo lidar1;
@@ -119,6 +160,11 @@ motorInfo motor1;
 motorInfo motor2;
 motorInfo motor3;
 motorInfo motor4;
+pidInfo   pid1;
+pidInfo   pid2;
+pidInfo   pid3;
+pidInfo   pid4;
+angleData angular_data;
 
 byte temp[2];
 //****************
@@ -138,7 +184,7 @@ void setup()
 
 void loop()
 {
-read_lidars();  // gets and reads lidars
+read_lidars();                                        // gets and reads lidars
 }
 
 void init_motors()
@@ -172,7 +218,7 @@ void init_motors()
   pinMode(MS2_4, OUTPUT);
   pinMode(MS3_4, OUTPUT);
 
- // resetBEDPins(); //Set step, direction, microstep and enable pins to default states
+  resetBEDPins(); //Set step, direction, microstep and enable pins to default states
 
   motor1.step_pin = stp1;
   motor1.step_val = LOW;
@@ -260,6 +306,36 @@ void init_motors()
   
 }
 
+void resetBEDPins()
+{
+  digitalWrite(stp1, LOW);
+  digitalWrite(dir1, LOW);
+  digitalWrite(MS1_1, LOW);
+  digitalWrite(MS2_1, LOW);
+  digitalWrite(MS3_1, LOW);
+  digitalWrite(EN1, HIGH);
+  
+    digitalWrite(stp2, LOW);
+  digitalWrite(dir2, LOW);
+  digitalWrite(MS1_2, LOW);
+  digitalWrite(MS2_2, LOW);
+  digitalWrite(MS3_2, LOW);
+  digitalWrite(EN2, HIGH);
+  
+    digitalWrite(stp3, LOW);
+  digitalWrite(dir3, LOW);
+  digitalWrite(MS1_3, LOW);
+  digitalWrite(MS2_3, LOW);
+  digitalWrite(MS3_3, LOW);
+  digitalWrite(EN3, HIGH);
+  
+    digitalWrite(stp4, LOW);
+  digitalWrite(dir4, LOW);
+  digitalWrite(MS1_4, LOW);
+  digitalWrite(MS2_4, LOW);
+  digitalWrite(MS3_4, LOW);
+  digitalWrite(EN4, HIGH);
+}
 
 void init_lidars() 
 {
@@ -365,8 +441,8 @@ void init_lidars()
 
   
  delay(1000);
-//
-//   digitalWrite(THREE_ENABLE, LIDAR_ON);
+
+//  digitalWrite(THREE_ENABLE, LIDAR_ON);
 //
 //  // wait at least 25 ms
 //  delay(25);
@@ -390,30 +466,6 @@ void init_lidars()
 //
 //  
 // delay(1000);
-
- 
-//Serial.println("DISTANCE 2");
-// Serial.println(lidar2.d);
-  // power the Third lidar
-   
- // digitalWrite(TWO_ENABLE, LIDAR_ON);
-//
-//  // wait at least 25 ms
- // delay(250);
-//
- // lidar3.interface.begin(0, true, LIDAR3_ADDR);
-//
- //   delay(1000);
-//    Serial.println("DISTANCE 3");
-// Serial.println(lidar3.d);
-
-  // power the fourth lidar
-//  digitalWrite(THREE_ENABLE, LIDAR_ON);
-
-  // wait at least 25 ms
-//  delay(40);
-
- // lidar4.interface.begin(0, true, LIDAR4_ADDR);
 
 
   lidar1.interface.configure(LIDAR_MODE, LIDAR1_ADDR);
@@ -450,11 +502,11 @@ void read_lidars()
     lidar2.d = (1 - LIDAR_FILT) * (lidar2.interface.distance(true, LIDAR2_ADDR) - lidar2.o) + LIDAR_FILT * lidar2.d;
     time2 = millis();
 
-//    //lidar3.d = lidar3.interface.distance(true, LIDAR3_ADDR);
+   //lidar3.d = lidar3.interface.distance(true, LIDAR3_ADDR);
     lidar3.d = (1 - LIDAR_FILT) * (lidar3.interface.distance(true, LIDAR3_ADDR) - lidar3.o) + LIDAR_FILT * lidar3.d;
     time3 = millis();
-//
-//    //lidar4.d = lidar4.interface.distance(true, LIDAR4_ADDR);
+    
+ //  //lidar4.d = lidar4.interface.distance(true, LIDAR4_ADDR);
    // lidar4.d = (1 - LIDAR_FILT) * (lidar4.interface.distance(true, LIDAR4_ADDR) - lidar4.o) + LIDAR_FILT * lidar4.d;
  //  time4 = millis();
   }
@@ -468,10 +520,10 @@ void read_lidars()
     lidar2.d = (1 - LIDAR_FILT) * (lidar2.interface.distance(false, LIDAR2_ADDR) - lidar2.o) + LIDAR_FILT * lidar2.d;
     time2 = millis();
 
-//    //lidar3.d = lidar3.interface.distance(true, LIDAR3_ADDR);
+    //lidar3.d = lidar3.interface.distance(true, LIDAR3_ADDR);
     lidar3.d = (1 - LIDAR_FILT) * (lidar3.interface.distance(false, LIDAR3_ADDR) - lidar3.o) + LIDAR_FILT * lidar3.d;
     time3 = millis();
-//
+
 //    //lidar4.d = lidar4.interface.distance(true, LIDAR4_ADDR);
  //  lidar4.d = (1 - LIDAR_FILT) * (lidar4.interface.distance(false, LIDAR4_ADDR) - lidar4.o) + LIDAR_FILT * lidar4.d;
 //   time4 = millis();
@@ -487,54 +539,264 @@ void read_lidars()
 //  Serial.print("D2 = "); Serial.print(lidar4.d); Serial.print('\t'); Serial.print("T2 = "); Serial.print(time4 - time3); Serial.print('\t');
 }
 
+//void Motor_Stepswitcher()
+{
+  Serial.println("Stepping at 1/16th microstep mode.");
+  digitalWrite(dir, HIGH); //Pull direction pin low to move "forward"
+//  digitalWrite(MS1, LOW); //Pull MS1,MS2, and MS3 high to set logic to 1/16th microstep resolution
+//  digitalWrite(MS2, HIGH);
+//  digitalWrite(MS3, LOW);
+  for(x= 1; x<1500; x++)  //Loop the forward stepping enough times for motion to be visible
+  {
+  iter=x/2;
+    if(iter > 330)
+    {
+      iter=330;
+    }
+    digitalWrite(stp,HIGH); //Trigger one step forward
+     delayMicroseconds(500-iter); //maximum physical delay allowed = 
+    //delay(1);
+    digitalWrite(stp,LOW); //Pull step pin low so it can be triggered again
+     delayMicroseconds(500-iter);
+    //delay(1);
+  }
+  delay(1000);
+  digitalWrite(dir, LOW); //Pull direction pin low to move "forward"
+for(x= 1; x<1500; x++)  //Loop the forward stepping enough times for motion to be visible
+  {
+  iter=x/2;
+    if(iter > 330)
+    {
+      iter=330;
+    }
+    digitalWrite(stp,HIGH); //Trigger one step forward
+     delayMicroseconds(500-iter);
+    //delay(1);
+    digitalWrite(stp,LOW); //Pull step pin low so it can be triggered again
+     delayMicroseconds(500-iter);
+    //delay(1);
+  }
+   
+  Serial.println("Enter new option");
+  Serial.println();
+}
+
+//*********************************************
+
+//gain scheduler() (Assign gains based on angular velocity) (GS var=angvel)
+//**********************************************
+
+void init_pid_controls(pidInfo &p1, pidInfo &p2, pidInfo &p3, pidInfo &p4)
+{
+  p1.pt = 0; p1.ct = 0; p1.dt = 0;
+  p1.ce = 0; p1.pe = 0;
+  p1.p = 0; p1.i = 0; p1.d = 0; p1.u = 0;
+
+  p1.sp = MIN_SETPOINT;
+  p1.kp = Kp1; p1.ki = Ki1; p1.kd = Kd1;
+//----------------------------------------
+  p2.pt = 0; p2.ct = 0; p2.dt = 0;
+  p2.ce = 0; p2.pe = 0;
+  p2.p = 0; p2.i = 0; p2.d = 0; p2.u = 0;
+
+  p2.sp = MIN_SETPOINT;
+  p2.kp = Kp2; p2.ki = Ki2; p2.kd = Kd2;
+//----------------------------------------
+  p3.pt = 0; p3.ct = 0; p3.dt = 0;
+  p3.ce = 0; p3.pe = 0;
+  p3.p = 0; p3.i = 0; p3.d = 0; p3.u = 0;
+
+  p3.sp = MIN_SETPOINT;
+  p3.kp = Kp3; p3.ki = Ki3; p3.kd = Kd3;
+//----------------------------------------
+  p4.pt = 0; p4.ct = 0; p4.dt = 0;
+  p4.ce = 0; p2.pe = 0;
+  p4.p = 0; p4.i = 0; p4.d = 0; p4.u = 0;
+
+  p4.sp = MIN_SETPOINT;
+  p4.kp = Kp4; p4.ki = Ki4; p4.kd = Kd4;
+  
+}
 
 
-//void init_pid_controls(pidInfo &p1, pidInfo &p2)
-//***********************************************
+ void control_mass(pidInfo &control, lidarInfo &sensor, motorInfo &motor)
+ {
+  control.ct = millis();                    // get current time
+  control.dt = control.ct - control.pt;     // calculate time delta
+  control.ce = sensor.d - control.sp;       // calculate error from setpoint
+  control.p = control.kp * control.ce;      // calculate pid control output
+  control.i = control.ki * (control.dt*.5*(control.ce + control.pe)+control.i);
+  control.d = control.kd * ((control.ce - control.pe)/control.dt);
+  control.u = control.p + control.i + control.d;
 
-//void control_mass(pidInfo &control, lidarInfo &sensor, motorInfo &motor)
-//***********************************************************************
+  if(control.ce >= 0)                       //***!!!#### determine motor direction
+  {
+    motor.dir_val = HIGH;
+  }
+  else
+  {
+    motor.dir_val = LOW;
+  }
 
-//void init_angular_data(angleData &data)
-//***********************************
+  motor.pwm_val = abs(control.u);          //***!!!#### Motor RPM vs delay (See recorded values)
+  if(motor.pwm_val > PWM_MAX)              //***!!!#### Change PWMval to step delay time val
+  {
+    motor.pwm_val = PWM_MAX;
+  }
+  else if(motor.pwm_val <= PWM_STALL)
+  {
+    motor.pwm_val = PWM_INIT;
+  }
 
-//void calculate_angular_data()
-//*************************
+  digitalWrite(motor.dir_pin,motor.dir_val); // actuate motor
+  analogWrite(motor.pwm_pin,motor.pwm_val);
 
-//void init accelerometer()
-//**********************
+  control.pe = control.ce;                  // save previous error
+  control.pt = control.ct;                  // save previous time
 
-//void accell()
-//*********************
+}
 
-//int readaxis(int axisPins)
-//*************************
+void init_angular_data(angleData &data)
+{
+  data.curr_angle = 0;
+  data.curr_time = millis();
+  
+  data.prev_time = data.curr_time;
+  data.prev_angle = data.curr_angle;
+
+  data.a0 = 0;
+  data.a1 = 0;
+  data.a2 = 0;
+  data.a3 = 0;
+  data.a4 = 0;
+  data.a5 = 0;
+  data.a6 = 0;
+  data.a7 = 0;
+  data.a8 = 0;
+  data.a9 = 0;
+  data.cntr = 0;
+}
+
+void calculate_angular_data()
+{
+  data.curr_time = millis();
+  // old code 
+  // data.velocity = 1000*(data.prev_angle - data.curr_angle)/((data.prev_time - data.curr_time));
+  float vel = 1000*(data.prev_angle - data.curr_angle)/((data.prev_time - data.curr_time));
+
+  data.prev_time = data.curr_time;
+  data.prev_angle = data.curr_angle;
+
+//  Serial.print("w = "); Serial.print(data.velocity); Serial.print('\t');
+   if ( vel > 1000 )
+   {
+    vel=data.velocity;
+   }
+  // calculate average velocity
+  switch (data.cntr) {
+    case 0:
+      data.a0 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 1:
+      data.a1 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 2:
+      data.a2 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 3:
+      data.a3 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 4:
+      data.a4 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 5:
+      data.a5 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 6:
+      data.a6 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 7:
+      data.a7 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 8:
+      data.a8 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 9:
+      data.a9 = vel;
+      data.cntr = 0;
+      break;
+  }
+  // moving average
+  data.velocity = (data.a0 + data.a1 + data.a2 + data.a3 + data.a4 + data.a5 + data.a6 + data.a7 + data.a8 + data.a9)/10;
+}
+
+void init accelerometer()
+{
+  analogReference(EXTERNAL);
+  // raw ranges
+  int zRawMin = 401;
+  int zRawMax = 664;
+  
+  int yRawMin = 396;
+  int yRawMax = 633;
+  
+  int xRawMin = 396;
+  int xRawMax = 617;
+ 
+}
+
+void accell()
+{
+  // int xRaw = ReadAxis(xInput);
+  int yRaw = ReadAxis(yInput);
+  int zRaw = ReadAxis(zInput);
+
+  // // Convert raw values to g fractions
+  // long xScaled = map(xRaw, xRawMin, xRawMax, -1000, 1000);
+  long yScaled = map(yRaw, yRawMin, yRawMax, -1000, 1000);
+  long zScaled = map(zRaw, zRawMin, zRawMax, -1000, 1000);
+
+  // Calculate angle
+  double ang = atan2((double) zScaled, (double) yScaled);
+  double angDEG = ang*180/3.1415927 - 95; // 90 for axis, 5 from calibration
+
+  // constrain between 0 and 360
+  if (angDEG < 0)
+  {
+    angDEG = angDEG + 360;
+  }
+
+//  Serial.print(angDEG); Serial.print('\n');
+
+  angular_data.curr_angle = angDEG;
+  calculate_angular_data(angular_data);
+}
+
+int ReadAxis(int axisPin) 
+{
+  long reading = 0;
+  analogRead(axisPin);
+  delay(1);
+  for (int i = 0; i < sampleSize; i++) {
+    reading += analogRead(axisPin);
+  }
+  return reading/sampleSize;
+}
 
 // void setpoint_from_angle()
 //**************************
 
 // void printfunc()
-// ******************
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// *************************
 
 
 

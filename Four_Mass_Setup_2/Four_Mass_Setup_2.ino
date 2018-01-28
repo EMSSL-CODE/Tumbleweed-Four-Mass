@@ -489,11 +489,32 @@ void read_lidars()
 
 
 
+//void init_pid_controls(pidInfo &p1, pidInfo &p2)
+//***********************************************
 
+//void control_mass(pidInfo &control, lidarInfo &sensor, motorInfo &motor)
+//***********************************************************************
 
+//void init_angular_data(angleData &data)
+//***********************************
 
+//void calculate_angular_data()
+//*************************
 
+//void init accelerometer()
+//**********************
 
+//void accell()
+//*********************
+
+//int readaxis(int axisPins)
+//*************************
+
+// void setpoint_from_angle()
+//**************************
+
+// void printfunc()
+// ******************
 
 
 
