@@ -344,13 +344,13 @@ void init_lidars()
   pinMode(ZERO_ENABLE, OUTPUT);
   pinMode(ONE_ENABLE, OUTPUT);
   pinMode(TWO_ENABLE, OUTPUT);
- // pinMode(THREE_ENABLE, OUTPUT);
+  pinMode(THREE_ENABLE, OUTPUT);
 
    
   digitalWrite(ZERO_ENABLE, LIDAR_ON);
   digitalWrite(ONE_ENABLE, LIDAR_ON);
   digitalWrite(TWO_ENABLE, LIDAR_ON);
-//  digitalWrite(THREE_ENABLE, LIDAR_ON);
+  digitalWrite(THREE_ENABLE, LIDAR_ON);
     
   delay(1000);
 
@@ -358,7 +358,7 @@ void init_lidars()
   digitalWrite(ZERO_ENABLE, LIDAR_OFF);
   digitalWrite(ONE_ENABLE, LIDAR_OFF);
   digitalWrite(TWO_ENABLE, LIDAR_OFF);
-//  digitalWrite(THREE_ENABLE, LIDAR_OFF);
+  digitalWrite(THREE_ENABLE, LIDAR_OFF);
   delay(5); // allow devices to power down gracefully
 
   // power the first lidar
@@ -442,41 +442,41 @@ void init_lidars()
   
  delay(1000);
 
-//  digitalWrite(THREE_ENABLE, LIDAR_ON);
-//
-//  // wait at least 25 ms
-//  delay(25);
-//  lidar4.interface.begin(0, true, DEFAULT_LIDAR_ADDR);
-//
-//  lidar4.interface.read(0x16, 2, temp, false, DEFAULT_LIDAR_ADDR); // read high serial byte
-//  Serial.print(temp[0]); Serial.print(temp[1]);
-//  lidar4.serial_high = temp[0];
-//  lidar4.interface.read(0x17, 2, temp, false, DEFAULT_LIDAR_ADDR); // read low serial byte
-//  Serial.print(temp[0]); Serial.print(temp[1]);
-//  lidar4.serial_low = temp[0];
-//
-//
-//  // seems to be required
-//  lidar4.interface.write(0x18, lidar4.serial_high, DEFAULT_LIDAR_ADDR); // write high serial byte
-//  lidar4.interface.write(0x19, lidar4.serial_low, DEFAULT_LIDAR_ADDR); // write low serial byte to unlock
-//
-//
-//  lidar4.interface.write(0x1a, LIDAR4_ADDR, DEFAULT_LIDAR_ADDR); // set desired address
-//  lidar4.interface.write(0x1e, 0x08, DEFAULT_LIDAR_ADDR);  // disable default address
-//
-//  
-// delay(1000);
+  digitalWrite(THREE_ENABLE, LIDAR_ON);
+
+  // wait at least 25 ms
+  delay(25);
+  lidar4.interface.begin(0, true, DEFAULT_LIDAR_ADDR);
+
+  lidar4.interface.read(0x16, 2, temp, false, DEFAULT_LIDAR_ADDR); // read high serial byte
+  Serial.print(temp[0]); Serial.print(temp[1]);
+  lidar4.serial_high = temp[0];
+  lidar4.interface.read(0x17, 2, temp, false, DEFAULT_LIDAR_ADDR); // read low serial byte
+  Serial.print(temp[0]); Serial.print(temp[1]);
+  lidar4.serial_low = temp[0];
+
+
+  // seems to be required
+  lidar4.interface.write(0x18, lidar4.serial_high, DEFAULT_LIDAR_ADDR); // write high serial byte
+  lidar4.interface.write(0x19, lidar4.serial_low, DEFAULT_LIDAR_ADDR); // write low serial byte to unlock
+
+
+  lidar4.interface.write(0x1a, LIDAR4_ADDR, DEFAULT_LIDAR_ADDR); // set desired address
+  lidar4.interface.write(0x1e, 0x08, DEFAULT_LIDAR_ADDR);  // disable default address
+
+  
+ delay(1000);
 
 
   lidar1.interface.configure(LIDAR_MODE, LIDAR1_ADDR);
   lidar2.interface.configure(LIDAR_MODE, LIDAR2_ADDR);
   lidar3.interface.configure(LIDAR_MODE, LIDAR3_ADDR);
- // lidar4.interface.configure(LIDAR_MODE, LIDAR4_ADDR);
+  lidar4.interface.configure(LIDAR_MODE, LIDAR4_ADDR);
 
   lidar1.o = LIDAR1_OFFSET;
   lidar2.o = LIDAR2_OFFSET;
   lidar3.o = LIDAR3_OFFSET;
-//  lidar4.o = LIDAR4_OFFSET;
+  lidar4.o = LIDAR4_OFFSET;
 
   delay(15);
 }
@@ -507,8 +507,8 @@ void read_lidars()
     time3 = millis();
     
  //  //lidar4.d = lidar4.interface.distance(true, LIDAR4_ADDR);
-   // lidar4.d = (1 - LIDAR_FILT) * (lidar4.interface.distance(true, LIDAR4_ADDR) - lidar4.o) + LIDAR_FILT * lidar4.d;
- //  time4 = millis();
+    lidar4.d = (1 - LIDAR_FILT) * (lidar4.interface.distance(true, LIDAR4_ADDR) - lidar4.o) + LIDAR_FILT * lidar4.d;
+    time4 = millis();
   }
   else
   {
@@ -525,8 +525,8 @@ void read_lidars()
     time3 = millis();
 
 //    //lidar4.d = lidar4.interface.distance(true, LIDAR4_ADDR);
- //  lidar4.d = (1 - LIDAR_FILT) * (lidar4.interface.distance(false, LIDAR4_ADDR) - lidar4.o) + LIDAR_FILT * lidar4.d;
-//   time4 = millis();
+    lidar4.d = (1 - LIDAR_FILT) * (lidar4.interface.distance(false, LIDAR4_ADDR) - lidar4.o) + LIDAR_FILT * lidar4.d;
+    time4 = millis();
   }
 
 
@@ -535,8 +535,8 @@ void read_lidars()
   Serial.print("T0 = "); Serial.print(timec); Serial.print('\t');
   Serial.print("D1 = "); Serial.print(lidar1.d); Serial.print('\t'); Serial.print("T1 = "); Serial.print(time1 - timec); Serial.print('\t');
   Serial.print("D2 = "); Serial.print(lidar2.d); Serial.print('\t'); Serial.print("T2 = "); Serial.print(time2 - time1); Serial.print('\t');
-  Serial.print("D3 = "); Serial.print(lidar3.d); Serial.print('\t'); Serial.print("T3 = "); Serial.print(time3 - time2); Serial.print('\n');
-//  Serial.print("D2 = "); Serial.print(lidar4.d); Serial.print('\t'); Serial.print("T2 = "); Serial.print(time4 - time3); Serial.print('\t');
+  Serial.print("D3 = "); Serial.print(lidar3.d); Serial.print('\t'); Serial.print("T3 = "); Serial.print(time3 - time2); Serial.print('\t');
+  Serial.print("D4 = "); Serial.print(lidar4.d); Serial.print('\t'); Serial.print("T4 = "); Serial.print(time4 - time3); Serial.print('\n');
 }
 
 //void Motor_Stepswitcher()
