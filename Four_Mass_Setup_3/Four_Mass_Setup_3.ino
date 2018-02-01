@@ -11,7 +11,7 @@
 #include <math.h>  
 
 // Setpoint Angular Velocity
-//*******************************
+#define SP_angvel                100.00f  // deg/s  (60 = 10rpm)  (90 = 15rpm)
 
 // Controller Physical Constants
 //*******************************
@@ -68,13 +68,39 @@
 
 
 // Controller Definitions (PID)
-//******************************
+#define Kp1                 3.1// 2.28   //Marginally Stable at 6       Kp 3.6   
+#define Ki1                 0.1// .1 // .25                                 0.3
+#define Kd1                 0.1667// 0 // .05 // .1667                         0.075
+#define Kp2                 1.25
+#define Ki2                 .1
+#define Kd2                 .05
+#define Kp3                 3.1
+#define Ki3                 0.1
+#define Kd3                 0.1667
+#define Kp4                 1.25
+#define Ki4                 .1
+#define Kd4                 .05
+#define MIN_SETPOINT        10.0f // 10.0f   ******MEASURE AND CHANGE THESE NUMBERS
+#define MAX_SETPOINT        35.0f // 40.0f   ******MEASURE AND CHANGE THESE NUMBERS
 
 // Accelerometer Definitions
-//******************************
+#define xInput              (A0)    // x acceleration, 0-1023 returned
+#define yInput              (A1)    // y acceleration, 0-1023 returned
+#define zInput              (A2)    // z acceleration, 0-1023 returned
+#define CONE_WIDTH          22.5      // cone angle from vertical
+#define sampleSize           2
 
 // Raw Ranges for Accelerometer
-//******************************
+int zRawMin = 401;
+int zRawMax = 664;
+
+int yRawMin = 396;
+int yRawMax = 633;
+
+int xRawMin = 396;
+int xRawMax = 617;
+
+int cone_state = 0;
 
 // Structures
 
@@ -171,20 +197,26 @@ byte temp[2];
 
 void setup() 
 {
-    Serial.begin(19200);
-
- // init_motors();
+  Serial.begin(19200);
+  init_motors();
   init_lidars();
-//  init_accelerometer();
-//  init_pid_controls(pid1, pid2);
-//  init_angular_data(angular_data);
+  init_accelerometer();
+  init_pid_controls(pid1, pid2, pid3, pid4);
+  init_angular_data(angular_data);
   delay(1000);
 
 }
 
 void loop()
 {
-read_lidars();                                        // gets and reads lidars
+   accell();
+   read_lidars();                                           // gets and reads lidars
+   setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
+   control_mass(pid1,lidar1,motor1);
+   control_mass(pid2,lidar2,motor2);
+   control_mass(pid3,lidar3,motor3);
+   control_mass(pid4,lidar4,motor4);
+   printfunc();
 }
 
 void init_motors()
@@ -531,55 +563,55 @@ void read_lidars()
 
 
 
-  Serial.print("Count = "); Serial.print(count); Serial.print('\t');
-  Serial.print("T0 = "); Serial.print(timec); Serial.print('\t');
-  Serial.print("D1 = "); Serial.print(lidar1.d); Serial.print('\t'); Serial.print("T1 = "); Serial.print(time1 - timec); Serial.print('\t');
-  Serial.print("D2 = "); Serial.print(lidar2.d); Serial.print('\t'); Serial.print("T2 = "); Serial.print(time2 - time1); Serial.print('\t');
-  Serial.print("D3 = "); Serial.print(lidar3.d); Serial.print('\t'); Serial.print("T3 = "); Serial.print(time3 - time2); Serial.print('\t');
-  Serial.print("D4 = "); Serial.print(lidar4.d); Serial.print('\t'); Serial.print("T4 = "); Serial.print(time4 - time3); Serial.print('\n');
+//  Serial.print("Count = "); Serial.print(count); Serial.print('\t');
+//  Serial.print("T0 = "); Serial.print(timec); Serial.print('\t');
+//  Serial.print("D1 = "); Serial.print(lidar1.d); Serial.print('\t'); Serial.print("T1 = "); Serial.print(time1 - timec); Serial.print('\t');
+//  Serial.print("D2 = "); Serial.print(lidar2.d); Serial.print('\t'); Serial.print("T2 = "); Serial.print(time2 - time1); Serial.print('\t');
+//  Serial.print("D3 = "); Serial.print(lidar3.d); Serial.print('\t'); Serial.print("T3 = "); Serial.print(time3 - time2); Serial.print('\t');
+//  Serial.print("D4 = "); Serial.print(lidar4.d); Serial.print('\t'); Serial.print("T4 = "); Serial.print(time4 - time3); Serial.print('\n');
 }
 
 //void Motor_Stepswitcher()
-{
-  Serial.println("Stepping at 1/16th microstep mode.");
-  digitalWrite(dir, HIGH); //Pull direction pin low to move "forward"
-//  digitalWrite(MS1, LOW); //Pull MS1,MS2, and MS3 high to set logic to 1/16th microstep resolution
-//  digitalWrite(MS2, HIGH);
-//  digitalWrite(MS3, LOW);
-  for(x= 1; x<1500; x++)  //Loop the forward stepping enough times for motion to be visible
-  {
-  iter=x/2;
-    if(iter > 330)
-    {
-      iter=330;
-    }
-    digitalWrite(stp,HIGH); //Trigger one step forward
-     delayMicroseconds(500-iter); //maximum physical delay allowed = 
-    //delay(1);
-    digitalWrite(stp,LOW); //Pull step pin low so it can be triggered again
-     delayMicroseconds(500-iter);
-    //delay(1);
-  }
-  delay(1000);
-  digitalWrite(dir, LOW); //Pull direction pin low to move "forward"
-for(x= 1; x<1500; x++)  //Loop the forward stepping enough times for motion to be visible
-  {
-  iter=x/2;
-    if(iter > 330)
-    {
-      iter=330;
-    }
-    digitalWrite(stp,HIGH); //Trigger one step forward
-     delayMicroseconds(500-iter);
-    //delay(1);
-    digitalWrite(stp,LOW); //Pull step pin low so it can be triggered again
-     delayMicroseconds(500-iter);
-    //delay(1);
-  }
-   
-  Serial.println("Enter new option");
-  Serial.println();
-}
+//{
+//  Serial.println("Stepping at 1/16th microstep mode.");
+//  digitalWrite(dir, HIGH); //Pull direction pin low to move "forward"
+////  digitalWrite(MS1, LOW); //Pull MS1,MS2, and MS3 high to set logic to 1/16th microstep resolution
+////  digitalWrite(MS2, HIGH);
+////  digitalWrite(MS3, LOW);
+//  for(x= 1; x<1500; x++)  //Loop the forward stepping enough times for motion to be visible
+//  {
+//  iter=x/2;
+//    if(iter > 330)
+//    {
+//      iter=330;
+//    }
+//    digitalWrite(stp,HIGH); //Trigger one step forward
+//     delayMicroseconds(500-iter); //maximum physical delay allowed = 
+//    //delay(1);
+//    digitalWrite(stp,LOW); //Pull step pin low so it can be triggered again
+//     delayMicroseconds(500-iter);
+//    //delay(1);
+//  }
+//  delay(1000);
+//  digitalWrite(dir, LOW); //Pull direction pin low to move "forward"
+//for(x= 1; x<1500; x++)  //Loop the forward stepping enough times for motion to be visible
+//  {
+//  iter=x/2;
+//    if(iter > 330)
+//    {
+//      iter=330;
+//    }
+//    digitalWrite(stp,HIGH); //Trigger one step forward
+//     delayMicroseconds(500-iter);
+//    //delay(1);
+//    digitalWrite(stp,LOW); //Pull step pin low so it can be triggered again
+//     delayMicroseconds(500-iter);
+//    //delay(1);
+//  }
+//   
+//  Serial.println("Enter new option");
+//  Serial.println();
+//}
 
 //*********************************************
 
@@ -739,7 +771,7 @@ void calculate_angular_data()
   data.velocity = (data.a0 + data.a1 + data.a2 + data.a3 + data.a4 + data.a5 + data.a6 + data.a7 + data.a8 + data.a9)/10;
 }
 
-void init accelerometer()
+void init_accelerometer()
 {
   analogReference(EXTERNAL);
   // raw ranges
@@ -792,14 +824,98 @@ int ReadAxis(int axisPin)
   return reading/sampleSize;
 }
 
-// void setpoint_from_angle()
-//**************************
+void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &pid4, angleData &data)
+// ASSUMES THAT YOU WANT TO SPIN CLOCKWISE!!!!
+{
 
-// void printfunc()
-// *************************
+  // IF OUTSIDE THE CONE, DO NOTHING!!!
+  if (((90 + CONE_WIDTH) < (angular_data.curr_angle) && (angular_data.curr_angle) < (270 - CONE_WIDTH))||((angular_data.curr_angle) > (270 + CONE_WIDTH) || (angular_data.curr_angle) < (90 - CONE_WIDTH)))
+    {
+      pid1.kp=0;
+      pid1.ki=0;
+      pid1.kd=0;
+    }
 
 
+  // IF INSIDE THE CONE, DO SOMETHING!!!
+  else
+    {
+      
+    if (abs(angular_data.velocity)<=SP_angvel)   // When current angvel less than desired angvel
+    {
+      // lower angle check
+      if ((270 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (270 - CONE_WIDTH))
+      {
+//        pid1.kp=3.1;
+//        pid1.ki=0.0;
+//        pid1.kd=0.1667;
+        pid3.sp = MAX_SETPOINT; // assume pid1 is left motor and up
+        pid4.sp = MIN_SETPOINT;
+        pid1.sp = MIN_SETPOINT;
+        pid2.sp = MAX_SETPOINT;
+        pid1.i = 0;
+        pid1.pe = 0;
+        pid2.i = 0;
+        pid2.pe = 0;
+        pid3.i = 0;
+        pid3.pe = 0;
+        pid4.i = 0;
+        pid4.pe = 0;
+      }
 
+      // upper angle check
+      if ((90 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (90 - CONE_WIDTH))
+      {
+//        pid1.kp=3.1;                                  
+//        pid1.ki=0.0;                                      
+//        pid1.kd=0.1667;                                   
+        pid3.sp = MIN_SETPOINT; // assume pid1 is left motor and up
+        pid4.sp = MAX_SETPOINT;
+        pid1.sp = MAX_SETPOINT;
+        pid2.sp = MIN_SETPOINT;
+        pid1.i = 0;
+        pid1.pe = 0;
+        pid2.i = 0;
+        pid2.pe = 0;
+        pid3.i = 0;
+        pid3.pe = 0;
+        pid4.i = 0;
+        pid4.pe = 0;
+      }
+    }
+  
+    if (abs(angular_data.velocity) > SP_angvel*1.7)
+    {
+//     pid1.kp = 0;                                      // 2.28   //Marginally Stable at 6       Kp 3.6   
+//     pid1.ki = 0.0;                                      // .1 // .25                                 0.3
+//     pid1.kd = 0;
+      pid1.sp = (MAX_SETPOINT + MIN_SETPOINT)/2;
+      pid2.sp = (MAX_SETPOINT + MIN_SETPOINT)/2;
+      pid3.sp = (MAX_SETPOINT + MIN_SETPOINT)/2;
+      pid4.sp = (MAX_SETPOINT + MIN_SETPOINT)/2;
+    }
+   }
+
+}
+
+ void printfunc()
+{
+  //Time Angle Dist 1 Dist 2 PWM1 PWM2  
+  Serial.print("Time:");Serial.print(millis());Serial.print("\t");
+  Serial.print("Angle:");Serial.print(angular_data.curr_angle);Serial.print("\t");
+  Serial.print("Ang Rate:");Serial.print(angular_data.velocity);Serial.print("\t");
+  Serial.print("Dist1:");Serial.print(lidar1.d);Serial.print("\t");
+  Serial.print("Dist2:");Serial.print(lidar2.d);Serial.print("\t");
+  Serial.print("PWM1:");Serial.print(motor1.pwm_val);Serial.print("\t");
+  Serial.print("PWM2:");Serial.print(motor2.pwm_val);Serial.println("\t");
+
+  //  Serial.print("Count = "); Serial.print(count); Serial.print('\t');
+//  Serial.print("T0 = "); Serial.print(timec); Serial.print('\t');
+//  Serial.print("D1 = "); Serial.print(lidar1.d); Serial.print('\t'); Serial.print("T1 = "); Serial.print(time1 - timec); Serial.print('\t');
+//  Serial.print("D2 = "); Serial.print(lidar2.d); Serial.print('\t'); Serial.print("T2 = "); Serial.print(time2 - time1); Serial.print('\t');
+//  Serial.print("D3 = "); Serial.print(lidar3.d); Serial.print('\t'); Serial.print("T3 = "); Serial.print(time3 - time2); Serial.print('\t');
+//  Serial.print("D4 = "); Serial.print(lidar4.d); Serial.print('\t'); Serial.print("T4 = "); Serial.print(time4 - time3); Serial.print('\n');
+}
 
 
 
