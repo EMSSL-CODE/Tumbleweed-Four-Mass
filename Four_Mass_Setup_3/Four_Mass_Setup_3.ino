@@ -18,6 +18,10 @@
 
 // Defining Motor Driver Pins (Motors 1 to 4)
 // Motor 1
+
+int tempvar = 1;
+#define STEP_INT_MAX             330
+
 #define dir1                    (24)      //Direction
 #define stp1                    (26)      //Step
 #define EN1                     (28)      //Enable
@@ -130,6 +134,7 @@ struct motorInfo
   int MS2_pin;
   int MS3_val;
   int MS3_pin;
+  int step_interval;                 //(500 - step_interval) Microseconds
 };
 
 //PID InfoStruct
@@ -264,7 +269,7 @@ void init_motors()
   motor1.MS2_pin  = MS2_1;
   motor1.MS3_val  = LOW;
   motor1.MS3_pin  = MS3_1;
-
+  motor1.step_interval = 1;                            //(500 - step_interval) Microseconds
   
   digitalWrite(motor1.step_pin, motor1.step_val);
   digitalWrite(motor1.dir_pin, motor1.dir_val);
@@ -285,7 +290,7 @@ void init_motors()
   motor2.MS2_pin  = MS2_2;
   motor2.MS3_val  = LOW;
   motor2.MS3_pin  = MS3_2;
-
+  motor2.step_interval = 1;                              //(500 - step_interval) Microseconds
   
   digitalWrite(motor2.step_pin, motor2.step_val);
   digitalWrite(motor2.dir_pin, motor2.dir_val);
@@ -306,7 +311,7 @@ void init_motors()
   motor3.MS2_pin  = MS2_3;
   motor3.MS3_val  = LOW;
   motor3.MS3_pin  = MS3_3;
-
+  motor3.step_interval = 1;                               //(500 - step_interval) Microseconds
   
   digitalWrite(motor3.step_pin, motor3.step_val);
   digitalWrite(motor3.dir_pin, motor3.dir_val);
@@ -327,7 +332,7 @@ void init_motors()
   motor4.MS2_pin  = MS2_4;
   motor4.MS3_val  = LOW;
   motor4.MS3_pin  = MS3_4;
-
+  motor4.step_interval = 1;                                //(500 - step_interval) Microseconds
   
   digitalWrite(motor4.step_pin, motor4.step_val);
   digitalWrite(motor4.dir_pin, motor4.dir_val);
@@ -670,22 +675,44 @@ void init_pid_controls(pidInfo &p1, pidInfo &p2, pidInfo &p3, pidInfo &p4)
     motor.dir_val = LOW;
   }
 
-  motor.pwm_val = abs(control.u);          //***!!!#### Motor RPM vs delay (See recorded values)
-  if(motor.pwm_val > PWM_MAX)              //***!!!#### Change PWMval to step delay time val
+  motor.step_interval = abs(control.u);          //***!!!#### Motor RPM vs delay (See recorded values)
+  if(motor.step_interval > STEP_INT_MAX)              //***!!!#### Change PWMval to step delay time val
   {
-    motor.pwm_val = PWM_MAX;
+    motor.step_interval = STEP_INT_MAX;
   }
-  else if(motor.pwm_val <= PWM_STALL)
-  {
-    motor.pwm_val = PWM_INIT;
-  }
+//  else if(motor.step_interval <= STEP_INT_STALL)
+//  {
+//    motor.step_interval = STEP_INT_INIT;
+//  }
 
   digitalWrite(motor.dir_pin,motor.dir_val); // actuate motor
-  analogWrite(motor.pwm_pin,motor.pwm_val);
+//  analogWrite(motor.pwm_pin,motor.pwm_val);      //********************  Motor Actuation function
+
+  motor.MS1_val= LOW;
+  motor.MS2_val= HIGH;
+  motor.MS3_val= LOW;
+
+  digitalWrite(motor.MS1_pin, motor.MS1_val); //Pull MS1,MS2, and MS3 high to set logic to 1/16th microstep resolution
+  digitalWrite(motor.MS2_pin, motor.MS2_val);
+  digitalWrite(motor.MS3_pin, motor.MS3_val);
+  
+  for(tempvar= 1; tempvar<1500; tempvar++)  //Loop the forward stepping enough times for motion to be visible
+  {
+  motor.step_interval=tempvar/2;
+    if(motor.step_interval > 330)
+    {
+      motor.step_interval=330;
+    }
+    digitalWrite(motor.step_pin,HIGH); //Trigger one step forward
+     delayMicroseconds(500-motor.step_interval); //maximum physical delay allowed = 
+    //delay(1);
+    digitalWrite(motor.step_pin,LOW); //Pull step pin low so it can be triggered again
+     delayMicroseconds(500-motor.step_interval);
+    //delay(1);
+  }
 
   control.pe = control.ce;                  // save previous error
   control.pt = control.ct;                  // save previous time
-
 }
 
 void init_angular_data(angleData &data)
@@ -709,7 +736,7 @@ void init_angular_data(angleData &data)
   data.cntr = 0;
 }
 
-void calculate_angular_data()
+void calculate_angular_data(angleData &data)
 {
   data.curr_time = millis();
   // old code 
@@ -886,7 +913,7 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
   
     if (abs(angular_data.velocity) > SP_angvel*1.7)
     {
-//     pid1.kp = 0;                                      // 2.28   //Marginally Stable at 6       Kp 3.6   
+//     pid1.kp = 0;                                        // 2.28   //Marginally Stable at 6       Kp 3.6   
 //     pid1.ki = 0.0;                                      // .1 // .25                                 0.3
 //     pid1.kd = 0;
       pid1.sp = (MAX_SETPOINT + MIN_SETPOINT)/2;
@@ -906,8 +933,7 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
   Serial.print("Ang Rate:");Serial.print(angular_data.velocity);Serial.print("\t");
   Serial.print("Dist1:");Serial.print(lidar1.d);Serial.print("\t");
   Serial.print("Dist2:");Serial.print(lidar2.d);Serial.print("\t");
-  Serial.print("PWM1:");Serial.print(motor1.pwm_val);Serial.print("\t");
-  Serial.print("PWM2:");Serial.print(motor2.pwm_val);Serial.println("\t");
+
 
   //  Serial.print("Count = "); Serial.print(count); Serial.print('\t');
 //  Serial.print("T0 = "); Serial.print(timec); Serial.print('\t');
