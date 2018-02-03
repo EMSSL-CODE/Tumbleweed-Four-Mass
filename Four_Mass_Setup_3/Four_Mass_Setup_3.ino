@@ -124,7 +124,7 @@ struct motorInfo
 {
   int step_val;
   int step_pin;
-  int dir_val;
+  int dir_val;     // dir high ==== clockwise
   int dir_pin;
   int en_val;
   int en_pin;
@@ -217,10 +217,10 @@ void loop()
    accell();
    read_lidars();                                           // gets and reads lidars
    setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
-   control_mass(pid1,lidar1,motor1);
-   control_mass(pid2,lidar2,motor2);
-   control_mass(pid3,lidar3,motor3);
-   control_mass(pid4,lidar4,motor4);
+ //  control_mass(pid1,lidar1,motor1);
+ //  control_mass(pid2,lidar2,motor2);
+ //  control_mass(pid3,lidar3,motor3);
+ //  control_mass(pid4,lidar4,motor4);
    printfunc();
 }
 
@@ -856,11 +856,11 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
 {
 
   // IF OUTSIDE THE CONE, DO NOTHING!!!
-  if (((90 + CONE_WIDTH) < (angular_data.curr_angle) && (angular_data.curr_angle) < (270 - CONE_WIDTH))||((angular_data.curr_angle) > (270 + CONE_WIDTH) || (angular_data.curr_angle) < (90 - CONE_WIDTH)))
+  if (((90 + CONE_WIDTH) < (data.curr_angle) && (data.curr_angle) < (270 - CONE_WIDTH))||((data.curr_angle) > (270 + CONE_WIDTH) || (data.curr_angle) < (90 - CONE_WIDTH)))
     {
-      pid1.kp=0;
-      pid1.ki=0;
-      pid1.kd=0;
+      pid1.kp=1;
+      pid1.ki=1;
+      pid1.kd=1;
     }
 
 
@@ -868,7 +868,7 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
   else
     {
       
-    if (abs(angular_data.velocity)<=SP_angvel)   // When current angvel less than desired angvel
+    if (abs(data.velocity)<=SP_angvel)   // When current angvel less than desired angvel
     {
       // lower angle check
       if ((270 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (270 - CONE_WIDTH))
@@ -911,7 +911,7 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
       }
     }
   
-    if (abs(angular_data.velocity) > SP_angvel*1.7)
+    if (abs(data.velocity) > SP_angvel*1.7)
     {
 //     pid1.kp = 0;                                        // 2.28   //Marginally Stable at 6       Kp 3.6   
 //     pid1.ki = 0.0;                                      // .1 // .25                                 0.3
@@ -933,7 +933,9 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
   Serial.print("Ang Rate:");Serial.print(angular_data.velocity);Serial.print("\t");
   Serial.print("Dist1:");Serial.print(lidar1.d);Serial.print("\t");
   Serial.print("Dist2:");Serial.print(lidar2.d);Serial.print("\t");
-
+  Serial.print("Dist3:");Serial.print(lidar3.d);Serial.print("\t");
+  Serial.print("Dist4:");Serial.print(lidar4.d);Serial.print("\n");
+  //delay(1000);
 
   //  Serial.print("Count = "); Serial.print(count); Serial.print('\t');
 //  Serial.print("T0 = "); Serial.print(timec); Serial.print('\t');
