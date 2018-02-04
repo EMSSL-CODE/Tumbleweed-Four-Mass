@@ -217,10 +217,10 @@ void loop()
    accell();
    read_lidars();                                           // gets and reads lidars
    setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
- //  control_mass(pid1,lidar1,motor1);
- //  control_mass(pid2,lidar2,motor2);
- //  control_mass(pid3,lidar3,motor3);
- //  control_mass(pid4,lidar4,motor4);
+   control_mass(pid1,lidar1,motor1);
+   control_mass(pid2,lidar2,motor2);
+   control_mass(pid3,lidar3,motor3);
+//   control_mass(pid4,lidar4,motor4);
    printfunc();
 }
 
@@ -659,22 +659,31 @@ void init_pid_controls(pidInfo &p1, pidInfo &p2, pidInfo &p3, pidInfo &p4)
  void control_mass(pidInfo &control, lidarInfo &sensor, motorInfo &motor)
  {
   control.ct = millis();                    // get current time
+ // Serial.print("ct = "); Serial.print(control.ct); Serial.print('\t');//delay(500);
   control.dt = control.ct - control.pt;     // calculate time delta
+ //  Serial.print("dt = "); Serial.print(control.dt); Serial.print('\t');//delay(500);
   control.ce = sensor.d - control.sp;       // calculate error from setpoint
+ //  Serial.print("ce = "); Serial.print(control.ce); Serial.print('\t');//delay(500);
   control.p = control.kp * control.ce;      // calculate pid control output
+//   Serial.print("P = "); Serial.print(control.p); Serial.print('\t');//delay(500);
   control.i = control.ki * (control.dt*.5*(control.ce + control.pe)+control.i);
+ //  Serial.print("I = "); Serial.print(control.i); Serial.print('\t');//delay(500);
   control.d = control.kd * ((control.ce - control.pe)/control.dt);
+//   Serial.print("D = "); Serial.print(control.d); Serial.print('\t');//delay(500);
   control.u = control.p + control.i + control.d;
+//   Serial.print("U = "); Serial.print(control.u); Serial.print('\t');//delay(500);
 
   if(control.ce >= 0)                       //***!!!#### determine motor direction
   {
     motor.dir_val = HIGH;
+    delay(60);
   }
   else
   {
     motor.dir_val = LOW;
+    delay(60);
   }
-
+//Serial.print("DIR = "); Serial.print(motor.dir_val); Serial.print('\n');
   motor.step_interval = abs(control.u);          //***!!!#### Motor RPM vs delay (See recorded values)
   if(motor.step_interval > STEP_INT_MAX)              //***!!!#### Change PWMval to step delay time val
   {
@@ -929,12 +938,12 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
 {
   //Time Angle Dist 1 Dist 2 PWM1 PWM2  
   Serial.print("Time:");Serial.print(millis());Serial.print("\t");
-  Serial.print("Angle:");Serial.print(angular_data.curr_angle);Serial.print("\t");
-  Serial.print("Ang Rate:");Serial.print(angular_data.velocity);Serial.print("\t");
-  Serial.print("Dist1:");Serial.print(lidar1.d);Serial.print("\t");
-  Serial.print("Dist2:");Serial.print(lidar2.d);Serial.print("\t");
-  Serial.print("Dist3:");Serial.print(lidar3.d);Serial.print("\t");
-  Serial.print("Dist4:");Serial.print(lidar4.d);Serial.print("\n");
+ // Serial.print("Angle:");Serial.print(angular_data.curr_angle);Serial.print("\t");
+ // Serial.print("Ang Rate:");Serial.print(angular_data.velocity);Serial.print("\t");
+ // Serial.print("Dist1:");Serial.print(lidar1.d);Serial.print("\t");
+ // Serial.print("Dist2:");Serial.print(lidar2.d);Serial.print("\t");
+//  Serial.print("Dist3:");Serial.print(lidar3.d);Serial.print("\t");
+//  Serial.print("Dist4:");Serial.print(lidar4.d);Serial.print("\n");
   //delay(1000);
 
   //  Serial.print("Count = "); Serial.print(count); Serial.print('\t');
