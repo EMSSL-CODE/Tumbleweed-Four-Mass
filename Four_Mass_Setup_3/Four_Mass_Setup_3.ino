@@ -5,6 +5,7 @@
 
 //************#### Determine Motor direction
 
+#include <AccelStepper.h>
 #include <Wire.h>
 #include <LIDARLite.h>
 #include <stdarg.h>
@@ -50,6 +51,11 @@ int tempvar = 1;
 #define MS2_4                   (45)
 #define MS3_4                   (47)
 
+AccelStepper stepper1(AccelStepper::FULL2WIRE, stp1, dir1); // step pin , dir pin
+AccelStepper stepper2(AccelStepper::FULL2WIRE, stp2, dir2); 
+AccelStepper stepper3(AccelStepper::FULL2WIRE, stp3, dir3); 
+AccelStepper stepper4(AccelStepper::FULL2WIRE, stp4, dir4); 
+
 
 // LIDAR Definitions
 #define ZERO_ENABLE               (53) // port 54, may be left unused
@@ -72,18 +78,18 @@ int tempvar = 1;
 
 
 // Controller Definitions (PID)
-#define Kp1                 3.1// 2.28   //Marginally Stable at 6       Kp 3.6   
-#define Ki1                 0.1// .1 // .25                                 0.3
-#define Kd1                 0.1667// 0 // .05 // .1667                         0.075
-#define Kp2                 1.25
-#define Ki2                 .1
-#define Kd2                 .05
-#define Kp3                 3.1
-#define Ki3                 0.1
-#define Kd3                 0.1667
-#define Kp4                 1.25
-#define Ki4                 .1
-#define Kd4                 .05
+#define Kp1                 1// 2.28   //Marginally Stable at 6       Kp 3.6   
+#define Ki1                 0.00// .1 // .25                                 0.3
+#define Kd1                 0.00// 0 // .05 // .1667                         0.075
+#define Kp2                 1
+#define Ki2                 0.00
+#define Kd2                 0.00
+#define Kp3                 1
+#define Ki3                 0.00
+#define Kd3                 0.0
+#define Kp4                 1
+#define Ki4                 0.00
+#define Kd4                 0.00
 #define MIN_SETPOINT        10.0f // 10.0f   ******MEASURE AND CHANGE THESE NUMBERS
 #define MAX_SETPOINT        35.0f // 40.0f   ******MEASURE AND CHANGE THESE NUMBERS
 
@@ -93,6 +99,7 @@ int tempvar = 1;
 #define zInput              (A2)    // z acceleration, 0-1023 returned
 #define CONE_WIDTH          22.5      // cone angle from vertical
 #define sampleSize           2
+
 
 // Raw Ranges for Accelerometer
 int zRawMin = 401;
@@ -106,6 +113,7 @@ int xRawMax = 617;
 
 int cone_state = 0;
 
+int t2=0;
 // Structures
 
 //Lidar Struct
@@ -218,8 +226,8 @@ void loop()
    read_lidars();                                           // gets and reads lidars
    setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
    control_mass(pid1,lidar1,motor1);
-   control_mass(pid2,lidar2,motor2);
-   control_mass(pid3,lidar3,motor3);
+//   control_mass(pid2,lidar2,motor2);
+//   control_mass(pid3,lidar3,motor3);
 //   control_mass(pid4,lidar4,motor4);
    printfunc();
 }
@@ -340,6 +348,22 @@ void init_motors()
   digitalWrite(motor4.MS1_pin, motor4.MS1_val);
   digitalWrite(motor4.MS2_pin, motor4.MS2_val);
   digitalWrite(motor4.MS3_pin, motor4.MS3_val);
+
+//    stepper1.setMaxSpeed(200.0);
+//    stepper1.setAcceleration(100.0);
+//    stepper1.moveTo(24);
+//    
+//    stepper2.setMaxSpeed(200.0);
+//    stepper2.setAcceleration(100.0);
+//    stepper2.moveTo(1000000);
+//    
+//    stepper3.setMaxSpeed(200.0);
+//    stepper3.setAcceleration(100.0);
+//    stepper3.moveTo(1000000); 
+//
+//    stepper4.setMaxSpeed(200.0);
+//    stepper4.setAcceleration(100.0);
+//    stepper4.moveTo(24);
   
 }
 
@@ -352,21 +376,21 @@ void resetBEDPins()
   digitalWrite(MS3_1, LOW);
   digitalWrite(EN1, HIGH);
   
-    digitalWrite(stp2, LOW);
+  digitalWrite(stp2, LOW);
   digitalWrite(dir2, LOW);
   digitalWrite(MS1_2, LOW);
   digitalWrite(MS2_2, LOW);
   digitalWrite(MS3_2, LOW);
   digitalWrite(EN2, HIGH);
   
-    digitalWrite(stp3, LOW);
+  digitalWrite(stp3, LOW);
   digitalWrite(dir3, LOW);
   digitalWrite(MS1_3, LOW);
   digitalWrite(MS2_3, LOW);
   digitalWrite(MS3_3, LOW);
   digitalWrite(EN3, HIGH);
   
-    digitalWrite(stp4, LOW);
+  digitalWrite(stp4, LOW);
   digitalWrite(dir4, LOW);
   digitalWrite(MS1_4, LOW);
   digitalWrite(MS2_4, LOW);
@@ -661,27 +685,30 @@ void init_pid_controls(pidInfo &p1, pidInfo &p2, pidInfo &p3, pidInfo &p4)
   control.ct = millis();                    // get current time
  // Serial.print("ct = "); Serial.print(control.ct); Serial.print('\t');//delay(500);
   control.dt = control.ct - control.pt;     // calculate time delta
- //  Serial.print("dt = "); Serial.print(control.dt); Serial.print('\t');//delay(500);
+   Serial.print("dt = "); Serial.print(control.dt); Serial.print('\t');//delay(500);
   control.ce = sensor.d - control.sp;       // calculate error from setpoint
  //  Serial.print("ce = "); Serial.print(control.ce); Serial.print('\t');//delay(500);
   control.p = control.kp * control.ce;      // calculate pid control output
-//   Serial.print("P = "); Serial.print(control.p); Serial.print('\t');//delay(500);
-  control.i = control.ki * (control.dt*.5*(control.ce + control.pe)+control.i);
- //  Serial.print("I = "); Serial.print(control.i); Serial.print('\t');//delay(500);
+ //  Serial.print("P = "); Serial.print(control.p); Serial.print('\t');//delay(500);
+ // control.i = control.ki * (control.dt*.5*(control.ce + control.pe)+control.i);
+  control.i = control.ki * (control.dt * .5 * (control.ce + control.pe)) + control.i;
+//   Serial.print("I = "); Serial.print(control.i); Serial.print('\t');//delay(500);
   control.d = control.kd * ((control.ce - control.pe)/control.dt);
 //   Serial.print("D = "); Serial.print(control.d); Serial.print('\t');//delay(500);
   control.u = control.p + control.i + control.d;
-//   Serial.print("U = "); Serial.print(control.u); Serial.print('\t');//delay(500);
+   Serial.print("U = "); Serial.print(control.u); Serial.print('\t');//delay(500);
 
   if(control.ce >= 0)                       //***!!!#### determine motor direction
   {
     motor.dir_val = HIGH;
     delay(60);
+    motor.step_interval=1;
   }
   else
   {
     motor.dir_val = LOW;
     delay(60);
+    motor.step_interval=1;
   }
 //Serial.print("DIR = "); Serial.print(motor.dir_val); Serial.print('\n');
   motor.step_interval = abs(control.u);          //***!!!#### Motor RPM vs delay (See recorded values)
@@ -697,28 +724,35 @@ void init_pid_controls(pidInfo &p1, pidInfo &p2, pidInfo &p3, pidInfo &p4)
   digitalWrite(motor.dir_pin,motor.dir_val); // actuate motor
 //  analogWrite(motor.pwm_pin,motor.pwm_val);      //********************  Motor Actuation function
 
-  motor.MS1_val= LOW;
-  motor.MS2_val= HIGH;
-  motor.MS3_val= LOW;
+//  motor.MS1_val= LOW;
+//  motor.MS2_val= HIGH;
+//  motor.MS3_val= LOW;
+//
+//  digitalWrite(motor.MS1_pin, motor.MS1_val); //Pull MS1,MS2, and MS3 high to set logic to 1/16th microstep resolution
+//  digitalWrite(motor.MS2_pin, motor.MS2_val);
+//  digitalWrite(motor.MS3_pin, motor.MS3_val);
 
-  digitalWrite(motor.MS1_pin, motor.MS1_val); //Pull MS1,MS2, and MS3 high to set logic to 1/16th microstep resolution
-  digitalWrite(motor.MS2_pin, motor.MS2_val);
-  digitalWrite(motor.MS3_pin, motor.MS3_val);
+
+
   
-  for(tempvar= 1; tempvar<1500; tempvar++)  //Loop the forward stepping enough times for motion to be visible
-  {
-  motor.step_interval=tempvar/2;
+ // for(tempvar= 1; tempvar<1500; tempvar++)  //Loop the forward stepping enough times for motion to be visible
+ // {
+  motor.step_interval=abs(control.u);
+    
     if(motor.step_interval > 330)
     {
       motor.step_interval=330;
     }
+     if (abs(control.u)>1)
+     {
     digitalWrite(motor.step_pin,HIGH); //Trigger one step forward
      delayMicroseconds(500-motor.step_interval); //maximum physical delay allowed = 
-    //delay(1);
+    
     digitalWrite(motor.step_pin,LOW); //Pull step pin low so it can be triggered again
      delayMicroseconds(500-motor.step_interval);
-    //delay(1);
-  }
+     }
+    motor.step_interval=motor.step_interval+1;
+//  }
 
   control.pe = control.ce;                  // save previous error
   control.pt = control.ct;                  // save previous time
@@ -867,9 +901,9 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
   // IF OUTSIDE THE CONE, DO NOTHING!!!
   if (((90 + CONE_WIDTH) < (data.curr_angle) && (data.curr_angle) < (270 - CONE_WIDTH))||((data.curr_angle) > (270 + CONE_WIDTH) || (data.curr_angle) < (90 - CONE_WIDTH)))
     {
-      pid1.kp=1;
-      pid1.ki=1;
-      pid1.kd=1;
+//      pid1.kp=1;
+//      pid1.ki=0.0001;
+//      pid1.kd=0.0001;
     }
 
 
@@ -882,9 +916,9 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
       // lower angle check
       if ((270 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (270 - CONE_WIDTH))
       {
-//        pid1.kp=3.1;
-//        pid1.ki=0.0;
-//        pid1.kd=0.1667;
+//        pid1.kp=1;
+//        pid1.ki=0.0001;
+//        pid1.kd=0.0001;
         pid3.sp = MAX_SETPOINT; // assume pid1 is left motor and up
         pid4.sp = MIN_SETPOINT;
         pid1.sp = MIN_SETPOINT;
@@ -902,9 +936,9 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
       // upper angle check
       if ((90 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (90 - CONE_WIDTH))
       {
-//        pid1.kp=3.1;                                  
-//        pid1.ki=0.0;                                      
-//        pid1.kd=0.1667;                                   
+//        pid1.kp=1;                                  
+//        pid1.ki=0.0001;                                      
+//        pid1.kd=0.0001;                                   
         pid3.sp = MIN_SETPOINT; // assume pid1 is left motor and up
         pid4.sp = MAX_SETPOINT;
         pid1.sp = MAX_SETPOINT;
@@ -937,13 +971,15 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
  void printfunc()
 {
   //Time Angle Dist 1 Dist 2 PWM1 PWM2  
-  Serial.print("Time:");Serial.print(millis());Serial.print("\t");
- // Serial.print("Angle:");Serial.print(angular_data.curr_angle);Serial.print("\t");
- // Serial.print("Ang Rate:");Serial.print(angular_data.velocity);Serial.print("\t");
- // Serial.print("Dist1:");Serial.print(lidar1.d);Serial.print("\t");
- // Serial.print("Dist2:");Serial.print(lidar2.d);Serial.print("\t");
-//  Serial.print("Dist3:");Serial.print(lidar3.d);Serial.print("\t");
-//  Serial.print("Dist4:");Serial.print(lidar4.d);Serial.print("\n");
+  t2=millis();
+  Serial.print("Time:");Serial.print(millis()-t2);Serial.print("\t");
+  t2=millis();
+  Serial.print("Angle:");Serial.print(angular_data.curr_angle);Serial.print("\t");
+  Serial.print("Ang Rate:");Serial.print(angular_data.velocity);Serial.print("\t");
+  Serial.print("Dist1:");Serial.print(lidar1.d);Serial.print("\t");
+  Serial.print("Dist2:");Serial.print(lidar2.d);Serial.print("\t");
+  Serial.print("Dist3:");Serial.print(lidar3.d);Serial.print("\t");
+  Serial.print("Dist4:");Serial.print(lidar4.d);Serial.print("\n");
   //delay(1000);
 
   //  Serial.print("Count = "); Serial.print(count); Serial.print('\t');
