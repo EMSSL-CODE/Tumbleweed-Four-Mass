@@ -143,6 +143,7 @@ struct motorInfo
   int MS3_val;
   int MS3_pin;
   int step_interval;                 //(500 - step_interval) Microseconds
+  int no;
 };
 
 //PID InfoStruct
@@ -158,6 +159,7 @@ struct pidInfo
   float i;                           // integral control
   float d;                           // derivative control
   float u;                           // control signal
+  int   tempU;
   float kp;                          // propotional gain
   float ki;                          // integral gain
   float kd;                          // derivative gain
@@ -207,7 +209,7 @@ angleData angular_data;
 
 byte temp[2];
 //****************
-
+// ********************************************************************************************************
 void setup() 
 {
   Serial.begin(19200);
@@ -226,12 +228,12 @@ void loop()
    read_lidars();                                           // gets and reads lidars
    setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
    control_mass(pid1,lidar1,motor1);
-//   control_mass(pid2,lidar2,motor2);
-//   control_mass(pid3,lidar3,motor3);
-//   control_mass(pid4,lidar4,motor4);
+ //  control_mass(pid2,lidar2,motor2);
+ //  control_mass(pid3,lidar3,motor3);
+  // control_mass(pid4,lidar4,motor4);
    printfunc();
 }
-
+// ********************************************************************************************************
 void init_motors()
 {
   // setup motor control pins
@@ -278,6 +280,7 @@ void init_motors()
   motor1.MS3_val  = LOW;
   motor1.MS3_pin  = MS3_1;
   motor1.step_interval = 1;                            //(500 - step_interval) Microseconds
+  motor1.no = 1; 
   
   digitalWrite(motor1.step_pin, motor1.step_val);
   digitalWrite(motor1.dir_pin, motor1.dir_val);
@@ -299,6 +302,7 @@ void init_motors()
   motor2.MS3_val  = LOW;
   motor2.MS3_pin  = MS3_2;
   motor2.step_interval = 1;                              //(500 - step_interval) Microseconds
+  motor2.no = 2; 
   
   digitalWrite(motor2.step_pin, motor2.step_val);
   digitalWrite(motor2.dir_pin, motor2.dir_val);
@@ -320,6 +324,7 @@ void init_motors()
   motor3.MS3_val  = LOW;
   motor3.MS3_pin  = MS3_3;
   motor3.step_interval = 1;                               //(500 - step_interval) Microseconds
+  motor3.no = 3; 
   
   digitalWrite(motor3.step_pin, motor3.step_val);
   digitalWrite(motor3.dir_pin, motor3.dir_val);
@@ -341,6 +346,7 @@ void init_motors()
   motor4.MS3_val  = LOW;
   motor4.MS3_pin  = MS3_4;
   motor4.step_interval = 1;                                //(500 - step_interval) Microseconds
+  motor4.no = 4; 
   
   digitalWrite(motor4.step_pin, motor4.step_val);
   digitalWrite(motor4.dir_pin, motor4.dir_val);
@@ -685,7 +691,7 @@ void init_pid_controls(pidInfo &p1, pidInfo &p2, pidInfo &p3, pidInfo &p4)
   control.ct = millis();                    // get current time
  // Serial.print("ct = "); Serial.print(control.ct); Serial.print('\t');//delay(500);
   control.dt = control.ct - control.pt;     // calculate time delta
-   Serial.print("dt = "); Serial.print(control.dt); Serial.print('\t');//delay(500);
+   Serial.print("no = "); Serial.print(motor.no); Serial.print('\t');//delay(500);
   control.ce = sensor.d - control.sp;       // calculate error from setpoint
  //  Serial.print("ce = "); Serial.print(control.ce); Serial.print('\t');//delay(500);
   control.p = control.kp * control.ce;      // calculate pid control output
@@ -716,46 +722,17 @@ void init_pid_controls(pidInfo &p1, pidInfo &p2, pidInfo &p3, pidInfo &p4)
   {
     motor.step_interval = STEP_INT_MAX;
   }
-//  else if(motor.step_interval <= STEP_INT_STALL)
-//  {
-//    motor.step_interval = STEP_INT_INIT;
-//  }
 
+  control.tempU=control.u;
   digitalWrite(motor.dir_pin,motor.dir_val); // actuate motor
-//  analogWrite(motor.pwm_pin,motor.pwm_val);      //********************  Motor Actuation function
-
-//  motor.MS1_val= LOW;
-//  motor.MS2_val= HIGH;
-//  motor.MS3_val= LOW;
-//
-//  digitalWrite(motor.MS1_pin, motor.MS1_val); //Pull MS1,MS2, and MS3 high to set logic to 1/16th microstep resolution
-//  digitalWrite(motor.MS2_pin, motor.MS2_val);
-//  digitalWrite(motor.MS3_pin, motor.MS3_val);
-
-
-
   
- // for(tempvar= 1; tempvar<1500; tempvar++)  //Loop the forward stepping enough times for motion to be visible
- // {
-  motor.step_interval=abs(control.u);
-    
-    if(motor.step_interval > 330)
-    {
-      motor.step_interval=330;
-    }
-     if (abs(control.u)>1)
-     {
-    digitalWrite(motor.step_pin,HIGH); //Trigger one step forward
-     delayMicroseconds(500-motor.step_interval); //maximum physical delay allowed = 
-    
-    digitalWrite(motor.step_pin,LOW); //Pull step pin low so it can be triggered again
-     delayMicroseconds(500-motor.step_interval);
-     }
-    motor.step_interval=motor.step_interval+1;
-//  }
+  Wire.beginTransmission(1); // transmit to particular motor
+  Wire.write(motor.step_interval);              // sends x 
+  Wire.endTransmission();    // stop transmitting
 
   control.pe = control.ce;                  // save previous error
   control.pt = control.ct;                  // save previous time
+ 
 }
 
 void init_angular_data(angleData &data)
