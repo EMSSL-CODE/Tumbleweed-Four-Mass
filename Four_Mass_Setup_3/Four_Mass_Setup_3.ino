@@ -5,11 +5,12 @@
 
 //************#### Determine Motor direction
 
-#include <AccelStepper.h>
+//#include <AccelStepper.h>
 #include <Wire.h>
 #include <LIDARLite.h>
 #include <stdarg.h>
 #include <math.h>  
+
 
 // Setpoint Angular Velocity
 #define SP_angvel                100.00f  // deg/s  (60 = 10rpm)  (90 = 15rpm)
@@ -23,45 +24,45 @@
 int tempvar = 1;
 #define STEP_INT_MAX             330
 
-#define dir1                    (24)      //Direction
-#define stp1                    (26)      //Step
-#define EN1                     (28)      //Enable
-#define MS1_1                   (25)      //Finer Motor control
-#define MS2_1                   (27)      //Finer Motor control
-#define MS3_1                   (29)      //Finer Motor control
+#define dir1                    (52)      //Direction
+#define stp1                    (51)      //Step
+#define EN1                     (41)      //Enable
+#define MS1_1                   (49)      //Finer Motor control
+#define MS2_1                   (48)      //Finer Motor control
+#define MS3_1                   (47)      //Finer Motor control
 //Motor 2
-#define dir2                    (30)
-#define stp2                    (32)
-#define EN2                     (34)
+#define dir2                    (22)
+#define stp2                    (24)
+#define EN2                     (43)
 #define MS1_2                   (31)
 #define MS2_2                   (33)
 #define MS3_2                   (35)
  // Motor 3
 #define dir3                    (36)
 #define stp3                    (38)
-#define EN3                     (40)
-#define MS1_3                   (37)
-#define MS2_3                   (39)
-#define MS3_3                   (41)
+#define EN3                     (39)
+#define MS1_3                   (37)     //////*****
+#define MS2_3                   (39)     //////****
+#define MS3_3                   (41)    /////****
  // Motor 4
 #define dir4                    (42)
 #define stp4                    (44)
-#define EN4                     (46)
-#define MS1_4                   (43)
+#define EN4                     (37)
+#define MS1_4                   (43)  //////******
 #define MS2_4                   (45)
-#define MS3_4                   (47)
+#define MS3_4                   (54)
 
-AccelStepper stepper1(AccelStepper::FULL2WIRE, stp1, dir1); // step pin , dir pin
-AccelStepper stepper2(AccelStepper::FULL2WIRE, stp2, dir2); 
-AccelStepper stepper3(AccelStepper::FULL2WIRE, stp3, dir3); 
-AccelStepper stepper4(AccelStepper::FULL2WIRE, stp4, dir4); 
+//AccelStepper stepper1(AccelStepper::FULL2WIRE, stp1, dir1); // step pin , dir pin
+//AccelStepper stepper2(AccelStepper::FULL2WIRE, stp2, dir2); 
+//AccelStepper stepper3(AccelStepper::FULL2WIRE, stp3, dir3); 
+//AccelStepper stepper4(AccelStepper::FULL2WIRE, stp4, dir4); 
 
 
 // LIDAR Definitions
 #define ZERO_ENABLE               (53) // port 54, may be left unused
-#define ONE_ENABLE                (52) // port 51
-#define TWO_ENABLE                (40) // port 52
-#define THREE_ENABLE              (44) // port 53
+#define ONE_ENABLE                (32) // port 51
+#define TWO_ENABLE                (28) // port 52
+#define THREE_ENABLE              (30) // port 53
 #define LIDAR_ON                  (0)  // lidar power enabled
 #define LIDAR_OFF                 (1)  // lidar power disabled
 #define DEFAULT_LIDAR_ADDR        (0x62)
@@ -90,13 +91,13 @@ AccelStepper stepper4(AccelStepper::FULL2WIRE, stp4, dir4);
 #define Kp4                 1
 #define Ki4                 0.00
 #define Kd4                 0.00
-#define MIN_SETPOINT        10.0f // 10.0f   ******MEASURE AND CHANGE THESE NUMBERS
+#define MIN_SETPOINT        25.0f // 10.0f   ******MEASURE AND CHANGE THESE NUMBERS
 #define MAX_SETPOINT        35.0f // 40.0f   ******MEASURE AND CHANGE THESE NUMBERS
 
 // Accelerometer Definitions
-#define xInput              (A0)    // x acceleration, 0-1023 returned
+#define xInput              (A2)    // x acceleration, 0-1023 returned
 #define yInput              (A1)    // y acceleration, 0-1023 returned
-#define zInput              (A2)    // z acceleration, 0-1023 returned
+#define zInput              (A0)    // z acceleration, 0-1023 returned
 #define CONE_WIDTH          22.5      // cone angle from vertical
 #define sampleSize           2
 
@@ -207,30 +208,30 @@ pidInfo   pid3;
 pidInfo   pid4;
 angleData angular_data;
 
+char d;
 byte temp[2];
 //****************
 // ********************************************************************************************************
 void setup() 
 {
   Serial.begin(19200);
-  init_motors();
-  init_lidars();
+ // init_motors();
+//  init_lidars();
   init_accelerometer();
-  init_pid_controls(pid1, pid2, pid3, pid4);
+//  init_pid_controls(pid1, pid2, pid3, pid4);
   init_angular_data(angular_data);
   delay(1000);
-
 }
 
 void loop()
 {
    accell();
-   read_lidars();                                           // gets and reads lidars
-   setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
-   control_mass(pid1,lidar1,motor1);
- //  control_mass(pid2,lidar2,motor2);
- //  control_mass(pid3,lidar3,motor3);
-  // control_mass(pid4,lidar4,motor4);
+ //  read_lidars();                                           // gets and reads lidars
+//   setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
+ //  control_mass(pid1,lidar1,motor1);
+//   control_mass(pid2,lidar2,motor2);
+//   control_mass(pid3,lidar3,motor3);
+//   control_mass(pid4,lidar4,motor4);
    printfunc();
 }
 // ********************************************************************************************************
@@ -454,10 +455,10 @@ void init_lidars()
   delay(1000);
 
 
-
   
-//Serial.println("DISTANCE 1");
-// Serial.println(lidar1.d);
+Serial.println("DISTANCE 1");
+Serial.println(lidar1.d);
+
   // power the second lidar
   digitalWrite(ONE_ENABLE, LIDAR_ON);
 
@@ -484,6 +485,9 @@ void init_lidars()
   
  delay(1000);
 
+Serial.println("DISTANCE 2");
+Serial.println(lidar2.d);
+
   digitalWrite(TWO_ENABLE, LIDAR_ON);
 
   // wait at least 25 ms
@@ -508,6 +512,9 @@ void init_lidars()
 
   
  delay(1000);
+
+ Serial.println("DISTANCE 3");
+Serial.println(lidar3.d);
 
   digitalWrite(THREE_ENABLE, LIDAR_ON);
 
@@ -534,6 +541,8 @@ void init_lidars()
   
  delay(1000);
 
+ Serial.println("DISTANCE 4");
+Serial.println(lidar4.d);
 
   lidar1.interface.configure(LIDAR_MODE, LIDAR1_ADDR);
   lidar2.interface.configure(LIDAR_MODE, LIDAR2_ADDR);
@@ -572,7 +581,7 @@ void read_lidars()
    //lidar3.d = lidar3.interface.distance(true, LIDAR3_ADDR);
     lidar3.d = (1 - LIDAR_FILT) * (lidar3.interface.distance(true, LIDAR3_ADDR) - lidar3.o) + LIDAR_FILT * lidar3.d;
     time3 = millis();
-    
+//    
  //  //lidar4.d = lidar4.interface.distance(true, LIDAR4_ADDR);
     lidar4.d = (1 - LIDAR_FILT) * (lidar4.interface.distance(true, LIDAR4_ADDR) - lidar4.o) + LIDAR_FILT * lidar4.d;
     time4 = millis();
@@ -709,12 +718,14 @@ void init_pid_controls(pidInfo &p1, pidInfo &p2, pidInfo &p3, pidInfo &p4)
     motor.dir_val = HIGH;
     delay(60);
     motor.step_interval=1;
+    char d='h';
   }
   else
   {
     motor.dir_val = LOW;
     delay(60);
     motor.step_interval=1;
+    char d='l';
   }
 //Serial.print("DIR = "); Serial.print(motor.dir_val); Serial.print('\n');
   motor.step_interval = abs(control.u);          //***!!!#### Motor RPM vs delay (See recorded values)
@@ -726,8 +737,8 @@ void init_pid_controls(pidInfo &p1, pidInfo &p2, pidInfo &p3, pidInfo &p4)
   control.tempU=control.u;
   digitalWrite(motor.dir_pin,motor.dir_val); // actuate motor
   
-  Wire.beginTransmission(1); // transmit to particular motor
-  Wire.write(motor.step_interval);              // sends x 
+  Wire.beginTransmission(motor.no); // transmit to particular motor
+  Wire.write(control.tempU);              // sends x 
   Wire.endTransmission();    // stop transmitting
 
   control.pe = control.ce;                  // save previous error

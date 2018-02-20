@@ -51,7 +51,7 @@ if (y<0)
 }
 Serial.println(y);
 x=abs(y);
-    if (x>50 || x<3)
+    if (x>50 || x<22)
     {
       digitalWrite(EN1, HIGH);
     
@@ -92,11 +92,11 @@ void loop()
 //      digitalWrite(EN1, HIGH);
 //    
     digitalWrite(stp1,HIGH); //Trigger one step forward
-     delayMicroseconds(num-x*5);
-   // delay(1);
+   //  delayMicroseconds(num-x*5);
+    delay(1);
     digitalWrite(stp1,LOW); //Pull step pin low so it can be triggered again
-     delayMicroseconds(num-x*5);
-   //  delay(1);
+   //  delayMicroseconds(num-x*5);
+     delay(1);
 //    }
 //
 //

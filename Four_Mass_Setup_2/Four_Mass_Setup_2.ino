@@ -18,13 +18,13 @@
 // Motor 1
 #define dir1                    (24)      //Direction
 #define stp1                    (26)      //Step
-#define EN1                     (28)      //Enable
+#define EN1                     (51)      //Enable
 #define MS1_1                   (25)      //Finer Motor control
 #define MS2_1                   (27)      //Finer Motor control
 #define MS3_1                   (29)      //Finer Motor control
 //Motor 2
-#define dir2                    (30)
-#define stp2                    (32)
+#define dir2                    (52)
+#define stp2                    (53)
 #define EN2                     (34)
 #define MS1_2                   (31)
 #define MS2_2                   (33)
@@ -47,9 +47,9 @@
 
 // LIDAR Definitions
 #define ZERO_ENABLE               (53) // port 54, may be left unused
-#define ONE_ENABLE                (52) // port 51
-#define TWO_ENABLE                (40) // port 52
-#define THREE_ENABLE              (44) // port 53
+#define ONE_ENABLE                (28) // port 51
+#define TWO_ENABLE                (30) // port 52
+#define THREE_ENABLE              (32) // port 53
 #define LIDAR_ON                  (0)  // lidar power enabled
 #define LIDAR_OFF                 (1)  // lidar power disabled
 #define DEFAULT_LIDAR_ADDR        (0x62)
