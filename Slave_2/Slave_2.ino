@@ -7,7 +7,7 @@
 #define MS1_1                   (2)      //Finer Motor control
 #define MS2_1                   (3)      //Finer Motor control
 #define MS3_1                   (4)      //Finer Motor control
-int num=320;
+int num=500;
 int x=0;
 int j=1;
 int iter=0;
@@ -26,7 +26,7 @@ void setup()
   digitalWrite(stp1, LOW);
   digitalWrite(EN1, LOW);
   digitalWrite(MS1_1, HIGH);
-  digitalWrite(MS2_1, HIGH);
+  digitalWrite(MS2_1, LOW);
   digitalWrite(MS3_1, LOW);
 
 

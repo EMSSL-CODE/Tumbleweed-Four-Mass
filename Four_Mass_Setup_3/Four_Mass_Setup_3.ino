@@ -24,7 +24,7 @@
 int tempvar = 1;
 #define STEP_INT_MAX             330
 
-#define dir1                    (41)      //Direction
+#define dir1                    (39)      //Direction
 #define stp1                    (45)      //Step
 #define EN1                     (46)      //Enable
 #define MS1_1                   (47)      //Finer Motor control
@@ -38,7 +38,7 @@ int tempvar = 1;
 #define MS2_2                   (25)
 #define MS3_2                   (26)
  // Motor 3
-#define dir3                    (39)
+#define dir3                    (41)
 #define stp3                    (27)
 #define EN3                     (29)
 #define MS1_3                   (31)     //////*****
@@ -711,21 +711,23 @@ void init_pid_controls(pidInfo &p1, pidInfo &p2, pidInfo &p3, pidInfo &p4)
   control.d = control.kd * ((control.ce - control.pe)/control.dt);
 //   Serial.print("D = "); Serial.print(control.d); Serial.print('\t');//delay(500);
   control.u = control.p + control.i + control.d;
- //  Serial.print("U = "); Serial.print(control.u); Serial.print('\t');//delay(500);
+   Serial.print("U = "); Serial.print(control.u); Serial.print('\t');//delay(500);
 
-  if(control.ce >= 0)                       //***!!!#### determine motor direction
+  if(control.u >= 0)                       //***!!!#### determine motor direction
   {
-    motor.dir_val = HIGH;
+    motor.dir_val = LOW;
    // delay(60);
     motor.step_interval=1;
     char d='h';
+    Serial.print(motor.dir_val);
   }
   else
   {
-    motor.dir_val = LOW;
+    motor.dir_val = HIGH;
     //delay(60);
     motor.step_interval=1;
     char d='l';
+    Serial.print(motor.dir_val);
   }
 //Serial.print("DIR = "); Serial.print(motor.dir_val); Serial.print('\n');
   motor.step_interval = abs(control.u);          //***!!!#### Motor RPM vs delay (See recorded values)
@@ -738,9 +740,9 @@ void init_pid_controls(pidInfo &p1, pidInfo &p2, pidInfo &p3, pidInfo &p4)
   digitalWrite(motor.dir_pin,motor.dir_val); // actuate motor
   
   Wire.beginTransmission(motor.no); // transmit to particular motor
-  Wire.write(control.tempU);              // sends x 
+  Wire.write(abs(control.tempU));              // sends x 
   Wire.endTransmission();    // stop transmitting
-
+//delay(2000);
   control.pe = control.ce;                  // save previous error
   control.pt = control.ct;                  // save previous time
  
@@ -889,7 +891,7 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
   // IF OUTSIDE THE CONE, DO NOTHING!!!
   if (((90 + CONE_WIDTH) < (data.curr_angle) && (data.curr_angle) < (270 - CONE_WIDTH))||((data.curr_angle) > (270 + CONE_WIDTH) || (data.curr_angle) < (90 - CONE_WIDTH)))
     {
-//      pid1.kp=1;
+        pid1.kp=1;
 //      pid1.ki=0.0001;
 //      pid1.kd=0.0001;
     }

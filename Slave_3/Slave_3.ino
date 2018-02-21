@@ -1,9 +1,9 @@
 
 #include <Wire.h>
 
-#define dir1                    (5)      //Direction
-#define stp1                    (6)      //Step
-#define EN1                     (7)      //Enable
+#define dir1                    (7)      //Direction
+#define stp1                    (5)      //Step
+#define EN1                     (6)      //Enable
 #define MS1_1                   (2)      //Finer Motor control
 #define MS2_1                   (3)      //Finer Motor control
 #define MS3_1                   (4)      //Finer Motor control
@@ -51,7 +51,7 @@ if (y<0)
 }
 Serial.println(y);
 x=abs(y);
-    if (x>50 || x<22)
+    if (x>50 || x<3)
     {
       digitalWrite(EN1, HIGH);
     
@@ -91,13 +91,16 @@ void loop()
 //    {
 //      digitalWrite(EN1, HIGH);
 //    
+//for (j=1;j<100;j++)
+//{
     digitalWrite(stp1,HIGH); //Trigger one step forward
      delayMicroseconds(num-x*5);
-   // delay(1);
+   // delay(10);
     digitalWrite(stp1,LOW); //Pull step pin low so it can be triggered again
      delayMicroseconds(num-x*5);
-   //  delay(1);
+    // delay(10);
 //    }
+//}
 //
 //
 // else
