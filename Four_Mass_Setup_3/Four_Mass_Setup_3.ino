@@ -24,33 +24,33 @@
 int tempvar = 1;
 #define STEP_INT_MAX             330
 
-#define dir1                    (52)      //Direction
-#define stp1                    (51)      //Step
-#define EN1                     (41)      //Enable
-#define MS1_1                   (49)      //Finer Motor control
+#define dir1                    (41)      //Direction
+#define stp1                    (45)      //Step
+#define EN1                     (46)      //Enable
+#define MS1_1                   (47)      //Finer Motor control
 #define MS2_1                   (48)      //Finer Motor control
-#define MS3_1                   (47)      //Finer Motor control
+#define MS3_1                   (49)      //Finer Motor control
 //Motor 2
-#define dir2                    (22)
-#define stp2                    (24)
-#define EN2                     (43)
-#define MS1_2                   (31)
-#define MS2_2                   (33)
-#define MS3_2                   (35)
+#define dir2                    (43)
+#define stp2                    (22)
+#define EN2                     (23)
+#define MS1_2                   (24)
+#define MS2_2                   (25)
+#define MS3_2                   (26)
  // Motor 3
-#define dir3                    (36)
-#define stp3                    (38)
-#define EN3                     (39)
-#define MS1_3                   (37)     //////*****
-#define MS2_3                   (39)     //////****
-#define MS3_3                   (41)    /////****
+#define dir3                    (39)
+#define stp3                    (27)
+#define EN3                     (29)
+#define MS1_3                   (31)     //////*****
+#define MS2_3                   (33)     //////****
+#define MS3_3                   (34)    /////****
  // Motor 4
-#define dir4                    (42)
-#define stp4                    (44)
-#define EN4                     (37)
-#define MS1_4                   (43)  //////******
-#define MS2_4                   (45)
-#define MS3_4                   (54)
+#define dir4                    (37)
+#define stp4                    (35)
+#define EN4                     (36)
+#define MS1_4                   (38)  //////******
+#define MS2_4                   (39)
+#define MS3_4                   (40)
 
 //AccelStepper stepper1(AccelStepper::FULL2WIRE, stp1, dir1); // step pin , dir pin
 //AccelStepper stepper2(AccelStepper::FULL2WIRE, stp2, dir2); 
@@ -60,8 +60,8 @@ int tempvar = 1;
 
 // LIDAR Definitions
 #define ZERO_ENABLE               (53) // port 54, may be left unused
-#define ONE_ENABLE                (32) // port 51
-#define TWO_ENABLE                (28) // port 52
+#define ONE_ENABLE                (28) // port 51
+#define TWO_ENABLE                (32) // port 52
 #define THREE_ENABLE              (30) // port 53
 #define LIDAR_ON                  (0)  // lidar power enabled
 #define LIDAR_OFF                 (1)  // lidar power disabled
@@ -215,10 +215,10 @@ byte temp[2];
 void setup() 
 {
   Serial.begin(19200);
- // init_motors();
-//  init_lidars();
+  init_motors();
+  init_lidars();
   init_accelerometer();
-//  init_pid_controls(pid1, pid2, pid3, pid4);
+  init_pid_controls(pid1, pid2, pid3, pid4);
   init_angular_data(angular_data);
   delay(1000);
 }
@@ -226,12 +226,12 @@ void setup()
 void loop()
 {
    accell();
- //  read_lidars();                                           // gets and reads lidars
-//   setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
- //  control_mass(pid1,lidar1,motor1);
-//   control_mass(pid2,lidar2,motor2);
-//   control_mass(pid3,lidar3,motor3);
-//   control_mass(pid4,lidar4,motor4);
+   read_lidars();                                           // gets and reads lidars
+   setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
+   control_mass(pid1,lidar1,motor1);
+   control_mass(pid2,lidar2,motor2);
+   control_mass(pid3,lidar3,motor3);
+   control_mass(pid4,lidar4,motor4);
    printfunc();
 }
 // ********************************************************************************************************
@@ -700,7 +700,7 @@ void init_pid_controls(pidInfo &p1, pidInfo &p2, pidInfo &p3, pidInfo &p4)
   control.ct = millis();                    // get current time
  // Serial.print("ct = "); Serial.print(control.ct); Serial.print('\t');//delay(500);
   control.dt = control.ct - control.pt;     // calculate time delta
-   Serial.print("no = "); Serial.print(motor.no); Serial.print('\t');//delay(500);
+ //  Serial.print("no = "); Serial.print(motor.no); Serial.print('\t');//delay(500);
   control.ce = sensor.d - control.sp;       // calculate error from setpoint
  //  Serial.print("ce = "); Serial.print(control.ce); Serial.print('\t');//delay(500);
   control.p = control.kp * control.ce;      // calculate pid control output
@@ -711,19 +711,19 @@ void init_pid_controls(pidInfo &p1, pidInfo &p2, pidInfo &p3, pidInfo &p4)
   control.d = control.kd * ((control.ce - control.pe)/control.dt);
 //   Serial.print("D = "); Serial.print(control.d); Serial.print('\t');//delay(500);
   control.u = control.p + control.i + control.d;
-   Serial.print("U = "); Serial.print(control.u); Serial.print('\t');//delay(500);
+ //  Serial.print("U = "); Serial.print(control.u); Serial.print('\t');//delay(500);
 
   if(control.ce >= 0)                       //***!!!#### determine motor direction
   {
     motor.dir_val = HIGH;
-    delay(60);
+   // delay(60);
     motor.step_interval=1;
     char d='h';
   }
   else
   {
     motor.dir_val = LOW;
-    delay(60);
+    //delay(60);
     motor.step_interval=1;
     char d='l';
   }
@@ -959,7 +959,7 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
  void printfunc()
 {
   //Time Angle Dist 1 Dist 2 PWM1 PWM2  
-  t2=millis();
+  //t2=millis();
   Serial.print("Time:");Serial.print(millis()-t2);Serial.print("\t");
   t2=millis();
   Serial.print("Angle:");Serial.print(angular_data.curr_angle);Serial.print("\t");

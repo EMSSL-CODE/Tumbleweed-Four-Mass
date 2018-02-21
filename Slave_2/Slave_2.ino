@@ -26,7 +26,7 @@ void setup()
   digitalWrite(stp1, LOW);
   digitalWrite(EN1, LOW);
   digitalWrite(MS1_1, HIGH);
-  digitalWrite(MS2_1, LOW);
+  digitalWrite(MS2_1, HIGH);
   digitalWrite(MS3_1, LOW);
 
 
@@ -87,16 +87,16 @@ void loop()
 //for(j= 1; j<17500; j++)  //Loop the forward stepping enough times for motion to be visible
  // {
 //****************************************
-//    if (x>50 || x<22)
+//    if (x>50 || x<3)
 //    {
 //      digitalWrite(EN1, HIGH);
 //    
     digitalWrite(stp1,HIGH); //Trigger one step forward
-   //  delayMicroseconds(num-x*5);
-    delay(1);
+     delayMicroseconds(num-x*5);
+   // delay(1);
     digitalWrite(stp1,LOW); //Pull step pin low so it can be triggered again
-  //   delayMicroseconds(num-x*5);
-     delay(1);
+     delayMicroseconds(num-x*5);
+   //  delay(1);
 //    }
 //
 //
