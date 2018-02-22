@@ -21,35 +21,43 @@
 // Defining Motor Driver Pins (Motors 1 to 4)
 // Motor 1
 
+
+// Dir Pins: 
+
+// 41 - White    Motor 4
+// 43 - Blue     Motor 1
+// 35 - Red      Motor 3
+// 39 - Green    Motor 2
+
 int tempvar = 1;
 #define STEP_INT_MAX             330
 
-#define dir1                    (39)      //Direction
-#define stp1                    (45)      //Step
+#define dir1                    (43)      //Direction
+#define stp1                    (37)      //Step
 #define EN1                     (46)      //Enable
-#define MS1_1                   (47)      //Finer Motor control
+#define MS1_1                   (42)      //Finer Motor control
 #define MS2_1                   (48)      //Finer Motor control
 #define MS3_1                   (49)      //Finer Motor control
 //Motor 2
-#define dir2                    (43)
+#define dir2                    (39)
 #define stp2                    (22)
 #define EN2                     (23)
 #define MS1_2                   (24)
 #define MS2_2                   (25)
 #define MS3_2                   (26)
  // Motor 3
-#define dir3                    (41)
+#define dir3                    (35)
 #define stp3                    (27)
 #define EN3                     (29)
 #define MS1_3                   (31)     //////*****
 #define MS2_3                   (33)     //////****
 #define MS3_3                   (34)    /////****
  // Motor 4
-#define dir4                    (37)
-#define stp4                    (35)
+#define dir4                    (41)
+#define stp4                    (42)
 #define EN4                     (36)
 #define MS1_4                   (38)  //////******
-#define MS2_4                   (39)
+#define MS2_4                   (44)
 #define MS3_4                   (40)
 
 //AccelStepper stepper1(AccelStepper::FULL2WIRE, stp1, dir1); // step pin , dir pin
@@ -70,10 +78,10 @@ int tempvar = 1;
 #define LIDAR2_ADDR               (0x42)
 #define LIDAR3_ADDR               (0x32)
 #define LIDAR4_ADDR               (0x52)
-#define LIDAR1_OFFSET              33  // MEASURE AND CHANGE LATER
-#define LIDAR2_OFFSET              33  // MEASURE AND CHANGE LATER
-#define LIDAR3_OFFSET              33  // MEASURE AND CHANGE LATER
-#define LIDAR4_OFFSET              33  // MEASURE AND CHANGE LATER
+#define LIDAR1_OFFSET            47 // 21.5  // MEASURE AND CHANGE LATER
+#define LIDAR2_OFFSET            44 // 26.5  // MEASURE AND CHANGE LATER
+#define LIDAR3_OFFSET           43 // 20.5  // MEASURE AND CHANGE LATER
+#define LIDAR4_OFFSET            43 // 20  // MEASURE AND CHANGE LATER
 #define LIDAR_MODE                  2 // default range, faster acquisition
 #define LIDAR_FILT                  0.87
 
@@ -91,8 +99,8 @@ int tempvar = 1;
 #define Kp4                 1
 #define Ki4                 0.00
 #define Kd4                 0.00
-#define MIN_SETPOINT        25.0f // 10.0f   ******MEASURE AND CHANGE THESE NUMBERS
-#define MAX_SETPOINT        35.0f // 40.0f   ******MEASURE AND CHANGE THESE NUMBERS
+#define MIN_SETPOINT        6.0f // 10.0f   ******MEASURE AND CHANGE THESE NUMBERS
+#define MAX_SETPOINT        39.0f // 40.0f   ******MEASURE AND CHANGE THESE NUMBERS
 
 // Accelerometer Definitions
 #define xInput              (A2)    // x acceleration, 0-1023 returned
@@ -711,7 +719,7 @@ void init_pid_controls(pidInfo &p1, pidInfo &p2, pidInfo &p3, pidInfo &p4)
   control.d = control.kd * ((control.ce - control.pe)/control.dt);
 //   Serial.print("D = "); Serial.print(control.d); Serial.print('\t');//delay(500);
   control.u = control.p + control.i + control.d;
-   Serial.print("U = "); Serial.print(control.u); Serial.print('\t');//delay(500);
+ //  Serial.print("U = "); Serial.print(control.u); Serial.print('\t');//delay(500);
 
   if(control.u >= 0)                       //***!!!#### determine motor direction
   {
@@ -909,10 +917,10 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
 //        pid1.kp=1;
 //        pid1.ki=0.0001;
 //        pid1.kd=0.0001;
-        pid3.sp = MAX_SETPOINT; // assume pid1 is left motor and up
-        pid4.sp = MIN_SETPOINT;
-        pid1.sp = MIN_SETPOINT;
-        pid2.sp = MAX_SETPOINT;
+        pid1.sp = MAX_SETPOINT;
+        pid2.sp = MIN_SETPOINT;
+        pid3.sp = MIN_SETPOINT; // assume pid1 is left motor and up
+        pid4.sp = MAX_SETPOINT;
         pid1.i = 0;
         pid1.pe = 0;
         pid2.i = 0;
@@ -929,10 +937,10 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
 //        pid1.kp=1;                                  
 //        pid1.ki=0.0001;                                      
 //        pid1.kd=0.0001;                                   
-        pid3.sp = MIN_SETPOINT; // assume pid1 is left motor and up
-        pid4.sp = MAX_SETPOINT;
-        pid1.sp = MAX_SETPOINT;
-        pid2.sp = MIN_SETPOINT;
+        pid1.sp = MIN_SETPOINT;
+        pid2.sp = MAX_SETPOINT;
+        pid3.sp = MAX_SETPOINT; // assume pid1 is left motor and up
+        pid4.sp = MIN_SETPOINT;
         pid1.i = 0;
         pid1.pe = 0;
         pid2.i = 0;

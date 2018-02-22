@@ -1,13 +1,13 @@
 
 #include <Wire.h>
 
-#define dir1                    (5)      //Direction
-#define stp1                    (6)      //Step
-#define EN1                     (7)      //Enable
+#define dir1                    (7)      //Direction
+#define stp1                    (5)      //Step
+#define EN1                     (6)      //Enable
 #define MS1_1                   (2)      //Finer Motor control
 #define MS2_1                   (3)      //Finer Motor control
 #define MS3_1                   (4)      //Finer Motor control
-int num=500;
+int num=320;
 int x=0;
 int j=1;
 int iter=0;
@@ -26,7 +26,7 @@ void setup()
   digitalWrite(stp1, LOW);
   digitalWrite(EN1, LOW);
   digitalWrite(MS1_1, HIGH);
-  digitalWrite(MS2_1, LOW);
+  digitalWrite(MS2_1, HIGH);
   digitalWrite(MS3_1, LOW);
 
 
@@ -51,7 +51,7 @@ if (y<0)
 }
 Serial.println(y);
 x=abs(y);
-    if (x>50 || x<22)
+    if (x>50 || x<3)
     {
       digitalWrite(EN1, HIGH);
     
