@@ -78,10 +78,10 @@ int tempvar = 1;
 #define LIDAR2_ADDR               (0x42)
 #define LIDAR3_ADDR               (0x32)
 #define LIDAR4_ADDR               (0x52)
-#define LIDAR1_OFFSET            47 // 21.5  // MEASURE AND CHANGE LATER
-#define LIDAR2_OFFSET            44 // 26.5  // MEASURE AND CHANGE LATER
-#define LIDAR3_OFFSET           43 // 20.5  // MEASURE AND CHANGE LATER
-#define LIDAR4_OFFSET            43 // 20  // MEASURE AND CHANGE LATER
+#define LIDAR1_OFFSET            26 // 21.5  // MEASURE AND CHANGE LATER
+#define LIDAR2_OFFSET            19 // 26.5  // MEASURE AND CHANGE LATER
+#define LIDAR3_OFFSET           27 // 20.5  // MEASURE AND CHANGE LATER
+#define LIDAR4_OFFSET            29.5 // 20  // MEASURE AND CHANGE LATER
 #define LIDAR_MODE                  2 // default range, faster acquisition
 #define LIDAR_FILT                  0.87
 
@@ -99,14 +99,14 @@ int tempvar = 1;
 #define Kp4                 1
 #define Ki4                 0.00
 #define Kd4                 0.00
-#define MIN_SETPOINT        6.0f // 10.0f   ******MEASURE AND CHANGE THESE NUMBERS
-#define MAX_SETPOINT        39.0f // 40.0f   ******MEASURE AND CHANGE THESE NUMBERS
+#define MIN_SETPOINT        25.0f // 10.0f   ******MEASURE AND CHANGE THESE NUMBERS
+#define MAX_SETPOINT        51.0f // 40.0f   ******MEASURE AND CHANGE THESE NUMBERS
 
 // Accelerometer Definitions
 #define xInput              (A2)    // x acceleration, 0-1023 returned
 #define yInput              (A1)    // y acceleration, 0-1023 returned
 #define zInput              (A0)    // z acceleration, 0-1023 returned
-#define CONE_WIDTH          22.5      // cone angle from vertical
+#define CONE_WIDTH          22      // cone angle from vertical
 #define sampleSize           2
 
 
@@ -897,17 +897,17 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
 {
 
   // IF OUTSIDE THE CONE, DO NOTHING!!!
-  if (((90 + CONE_WIDTH) < (data.curr_angle) && (data.curr_angle) < (270 - CONE_WIDTH))||((data.curr_angle) > (270 + CONE_WIDTH) || (data.curr_angle) < (90 - CONE_WIDTH)))
-    {
-        pid1.kp=1;
-//      pid1.ki=0.0001;
-//      pid1.kd=0.0001;
-    }
-
-
-  // IF INSIDE THE CONE, DO SOMETHING!!!
-  else
-    {
+//  if (((90 + CONE_WIDTH) < (data.curr_angle) && (data.curr_angle) < (270 - CONE_WIDTH))||((data.curr_angle) > (270 + CONE_WIDTH) || (data.curr_angle) < (90 - CONE_WIDTH)))
+//    {
+////        pid1.kp=1;
+////      pid1.ki=0.0001;
+////      pid1.kd=0.0001;
+//    }
+//
+//
+//  // IF INSIDE THE CONE, DO SOMETHING!!!
+//  else
+//    {
       
     if (abs(data.velocity)<=SP_angvel)   // When current angvel less than desired angvel
     {
@@ -931,14 +931,53 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
         pid4.pe = 0;
       }
 
+if ((180 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (180 - CONE_WIDTH))
+      {
+//        pid1.kp=1;
+//        pid1.ki=0.0001;
+//        pid1.kd=0.0001;
+        pid1.sp = MIN_SETPOINT;
+        pid2.sp = MAX_SETPOINT;
+        pid3.sp = MIN_SETPOINT; // assume pid1 is left motor and up
+        pid4.sp = MAX_SETPOINT;
+        pid1.i = 0;
+        pid1.pe = 0;
+        pid2.i = 0;
+        pid2.pe = 0;
+        pid3.i = 0;
+        pid3.pe = 0;
+        pid4.i = 0;
+        pid4.pe = 0;
+      }
+      
+
       // upper angle check
-      if ((90 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (90 - CONE_WIDTH))
+if ((90 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (90 - CONE_WIDTH))
       {
 //        pid1.kp=1;                                  
 //        pid1.ki=0.0001;                                      
 //        pid1.kd=0.0001;                                   
         pid1.sp = MIN_SETPOINT;
         pid2.sp = MAX_SETPOINT;
+        pid3.sp = MAX_SETPOINT; // assume pid1 is left motor and up
+        pid4.sp = MIN_SETPOINT;
+        pid1.i = 0;
+        pid1.pe = 0;
+        pid2.i = 0;
+        pid2.pe = 0;
+        pid3.i = 0;
+        pid3.pe = 0;
+        pid4.i = 0;
+        pid4.pe = 0;
+      }
+    
+if (((0 + CONE_WIDTH) > data.curr_angle && data.curr_angle > 0)||(361 > data.curr_angle && data.curr_angle > (360 - CONE_WIDTH)))
+      {
+//        pid1.kp=1;                                  
+//        pid1.ki=0.0001;                                      
+//        pid1.kd=0.0001;                                   
+        pid1.sp = MAX_SETPOINT;
+        pid2.sp = MIN_SETPOINT;
         pid3.sp = MAX_SETPOINT; // assume pid1 is left motor and up
         pid4.sp = MIN_SETPOINT;
         pid1.i = 0;
@@ -964,7 +1003,7 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
     }
    }
 
-}
+
 
  void printfunc()
 {
