@@ -1138,7 +1138,13 @@ if (((0 + CONE_WIDTH) > data.curr_angle && data.curr_angle > 0)||(361 > data.cur
     }
    }
 
+void amplitude_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &pid4, angleData &data)
+{
+  // Amplitude as a function of angular velocity
+  // End points of amplitude as a function of angle 
 
+
+}
 
  void printfunc()
 {
