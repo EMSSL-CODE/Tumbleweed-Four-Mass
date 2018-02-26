@@ -25,7 +25,7 @@ void setup()
   digitalWrite(dir1, HIGH);
   digitalWrite(stp1, LOW);
   digitalWrite(EN1, LOW);
-  digitalWrite(MS1_1, HIGH);
+  digitalWrite(MS1_1, LOW);
   digitalWrite(MS2_1, HIGH);
   digitalWrite(MS3_1, LOW);
 

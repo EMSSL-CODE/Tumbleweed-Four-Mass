@@ -100,7 +100,7 @@ int tempvar = 1;
 #define Ki4                 0.00
 #define Kd4                 0.00
 #define MIN_SETPOINT        25.0f // 10.0f   ******MEASURE AND CHANGE THESE NUMBERS
-#define MAX_SETPOINT        51.0f // 40.0f   ******MEASURE AND CHANGE THESE NUMBERS
+#define MAX_SETPOINT        55.0f // 40.0f   ******MEASURE AND CHANGE THESE NUMBERS
 
 // Accelerometer Definitions
 #define xInput              (A2)    // x acceleration, 0-1023 returned
@@ -185,6 +185,7 @@ struct angleData
   float next_angle;
   float velocity;
   float acceleration;
+  int rot_count;
   
   // 10 angle values for moving average
   float a1;
@@ -235,11 +236,23 @@ void loop()
 {
    accell();
    read_lidars();                                           // gets and reads lidars
-   setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
+  // Acceleration:
+  if (angular_data.rot_count < 10)
+   {
+    setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
+   }
+   if (angular_data.rot_count >= 10)
+   {
+    // Braking:
+   braking_setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
+   }
+  
+ 
    control_mass(pid1,lidar1,motor1);
    control_mass(pid2,lidar2,motor2);
    control_mass(pid3,lidar3,motor3);
    control_mass(pid4,lidar4,motor4);
+   
    printfunc();
 }
 // ********************************************************************************************************
@@ -760,6 +773,8 @@ void init_angular_data(angleData &data)
 {
   data.curr_angle = 0;
   data.curr_time = millis();
+
+  data.rot_count = 0;
   
   data.prev_time = data.curr_time;
   data.prev_angle = data.curr_angle;
@@ -837,6 +852,8 @@ void calculate_angular_data(angleData &data)
   }
   // moving average
   data.velocity = (data.a0 + data.a1 + data.a2 + data.a3 + data.a4 + data.a5 + data.a6 + data.a7 + data.a8 + data.a9)/10;
+
+  data.rot_count=data.rot_count+ data.curr_angle/360;
 }
 
 void init_accelerometer()
@@ -1003,6 +1020,124 @@ if (((0 + CONE_WIDTH) > data.curr_angle && data.curr_angle > 0)||(361 > data.cur
     }
    }
 
+void braking_setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &pid4, angleData &data)
+// ASSUMES THAT YOU WANT TO BRAKE BY SPINNING ANTICLOCKWISE!!!!
+{
+
+  // IF OUTSIDE THE CONE, DO NOTHING!!!
+//  if (((90 + CONE_WIDTH) < (data.curr_angle) && (data.curr_angle) < (270 - CONE_WIDTH))||((data.curr_angle) > (270 + CONE_WIDTH) || (data.curr_angle) < (90 - CONE_WIDTH)))
+//    {
+////        pid1.kp=1;
+////      pid1.ki=0.0001;
+////      pid1.kd=0.0001;
+//    }
+//
+//
+//  // IF INSIDE THE CONE, DO SOMETHING!!!
+//  else
+//    {
+      
+    if ((abs(data.velocity)<=SP_angvel)&&(abs(data.velocity) > 0.9))   // When current angvel less than desired angvel
+    {
+      // lower angle check
+      if ((270 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (270 - CONE_WIDTH))
+      {
+//        pid1.kp=1;
+//        pid1.ki=0.0001;
+//        pid1.kd=0.0001;
+        pid1.sp = MAX_SETPOINT;
+        pid2.sp = MIN_SETPOINT;
+        pid3.sp = MAX_SETPOINT; // assume pid1 is left motor and up
+        pid4.sp = MIN_SETPOINT;
+        pid1.i = 0;
+        pid1.pe = 0;
+        pid2.i = 0;
+        pid2.pe = 0;
+        pid3.i = 0;
+        pid3.pe = 0;
+        pid4.i = 0;
+        pid4.pe = 0;
+      }
+
+if ((180 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (180 - CONE_WIDTH))
+      {
+//        pid1.kp=1;
+//        pid1.ki=0.0001;
+//        pid1.kd=0.0001;
+        pid1.sp = MIN_SETPOINT;
+        pid2.sp = MAX_SETPOINT;
+        pid3.sp = MAX_SETPOINT; // assume pid1 is left motor and up
+        pid4.sp = MIN_SETPOINT;
+        pid1.i = 0;
+        pid1.pe = 0;
+        pid2.i = 0;
+        pid2.pe = 0;
+        pid3.i = 0;
+        pid3.pe = 0;
+        pid4.i = 0;
+        pid4.pe = 0;
+      }
+      
+
+      // upper angle check
+if ((90 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (90 - CONE_WIDTH))
+      {
+//        pid1.kp=1;                                  
+//        pid1.ki=0.0001;                                      
+//        pid1.kd=0.0001;                                   
+        pid1.sp = MIN_SETPOINT;
+        pid2.sp = MAX_SETPOINT;
+        pid3.sp = MIN_SETPOINT; // assume pid1 is left motor and up
+        pid4.sp = MAX_SETPOINT;
+        pid1.i = 0;
+        pid1.pe = 0;
+        pid2.i = 0;
+        pid2.pe = 0;
+        pid3.i = 0;
+        pid3.pe = 0;
+        pid4.i = 0;
+        pid4.pe = 0;
+      }
+    
+if (((0 + CONE_WIDTH) > data.curr_angle && data.curr_angle > 0)||(361 > data.curr_angle && data.curr_angle > (360 - CONE_WIDTH)))
+      {
+//        pid1.kp=1;                                  
+//        pid1.ki=0.0001;                                      
+//        pid1.kd=0.0001;                                   
+        pid1.sp = MAX_SETPOINT;
+        pid2.sp = MIN_SETPOINT;
+        pid3.sp = MIN_SETPOINT; // assume pid1 is left motor and up
+        pid4.sp = MAX_SETPOINT;
+        pid1.i = 0;
+        pid1.pe = 0;
+        pid2.i = 0;
+        pid2.pe = 0;
+        pid3.i = 0;
+        pid3.pe = 0;
+        pid4.i = 0;
+        pid4.pe = 0;
+      }
+    }
+  
+    if (abs(data.velocity) > SP_angvel*1.7)
+    {
+//     pid1.kp = 0;                                        // 2.28   //Marginally Stable at 6       Kp 3.6   
+//     pid1.ki = 0.0;                                      // .1 // .25                                 0.3
+//     pid1.kd = 0;
+      pid1.sp = (MAX_SETPOINT + MIN_SETPOINT)/2;
+      pid2.sp = (MAX_SETPOINT + MIN_SETPOINT)/2;
+      pid3.sp = (MAX_SETPOINT + MIN_SETPOINT)/2;
+      pid4.sp = (MAX_SETPOINT + MIN_SETPOINT)/2;
+    }
+    if (abs(data.velocity) <= 0.9)
+    {
+      pid1.sp = MIN_SETPOINT;
+      pid2.sp = MIN_SETPOINT;
+      pid3.sp = MIN_SETPOINT;
+      pid4.sp = MIN_SETPOINT;
+    }
+   }
+
 
 
  void printfunc()
@@ -1016,7 +1151,8 @@ if (((0 + CONE_WIDTH) > data.curr_angle && data.curr_angle > 0)||(361 > data.cur
   Serial.print("Dist1:");Serial.print(lidar1.d);Serial.print("\t");
   Serial.print("Dist2:");Serial.print(lidar2.d);Serial.print("\t");
   Serial.print("Dist3:");Serial.print(lidar3.d);Serial.print("\t");
-  Serial.print("Dist4:");Serial.print(lidar4.d);Serial.print("\n");
+  Serial.print("Dist4:");Serial.print(lidar4.d);Serial.print("\t");
+  Serial.print("Completed Rot:");Serial.print(angular_data.rot_count);Serial.print("\n");
   //delay(1000);
 
   //  Serial.print("Count = "); Serial.print(count); Serial.print('\t');

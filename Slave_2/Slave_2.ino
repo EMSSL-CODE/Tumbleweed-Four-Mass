@@ -93,9 +93,11 @@ void loop()
 //    
     digitalWrite(stp1,HIGH); //Trigger one step forward
      delayMicroseconds(num-x*5);
+   //  delayMicroseconds(900);
    // delay(1);
     digitalWrite(stp1,LOW); //Pull step pin low so it can be triggered again
      delayMicroseconds(num-x*5);
+    //    delayMicroseconds(900);
    //  delay(1);
 //    }
 //

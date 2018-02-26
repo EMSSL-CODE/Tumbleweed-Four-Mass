@@ -7,7 +7,7 @@
 #define MS1_1                   (2)      //Finer Motor control
 #define MS2_1                   (3)      //Finer Motor control
 #define MS3_1                   (4)      //Finer Motor control
-int num=320;
+int num=270;
 int x=0;
 int j=1;
 int iter=0;
@@ -25,7 +25,7 @@ void setup()
   digitalWrite(dir1, HIGH);
   digitalWrite(stp1, LOW);
   digitalWrite(EN1, LOW);
-  digitalWrite(MS1_1, HIGH);
+  digitalWrite(MS1_1, LOW);
   digitalWrite(MS2_1, HIGH);
   digitalWrite(MS3_1, LOW);
 
@@ -93,9 +93,11 @@ void loop()
 //    
     digitalWrite(stp1,HIGH); //Trigger one step forward
      delayMicroseconds(num-x*5);
+   //  delayMicroseconds(900);
    // delay(1);
     digitalWrite(stp1,LOW); //Pull step pin low so it can be triggered again
      delayMicroseconds(num-x*5);
+    //    delayMicroseconds(900);
    //  delay(1);
 //    }
 //
