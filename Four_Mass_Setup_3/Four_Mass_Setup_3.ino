@@ -60,11 +60,6 @@ int tempvar = 1;
 #define MS2_4                   (44)
 #define MS3_4                   (40)
 
-//AccelStepper stepper1(AccelStepper::FULL2WIRE, stp1, dir1); // step pin , dir pin
-//AccelStepper stepper2(AccelStepper::FULL2WIRE, stp2, dir2); 
-//AccelStepper stepper3(AccelStepper::FULL2WIRE, stp3, dir3); 
-//AccelStepper stepper4(AccelStepper::FULL2WIRE, stp4, dir4); 
-
 
 // LIDAR Definitions
 #define ZERO_ENABLE               (53) // port 54, may be left unused
@@ -236,17 +231,53 @@ void loop()
 {
    accell();
    read_lidars();                                           // gets and reads lidars
-  // Acceleration:
-  if (angular_data.rot_count < 10)
+
+  // =======CASE 1: Start -> Accelerate -> 10(n) Rotations -> Brake -> Stop  
+  //=====================================ONE==================================// 
+
+  if (angular_data.rot_count < 7)  
    {
-    setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
+    // Acceleration
+    setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);  // Accelerates TW
    }
-   if (angular_data.rot_count >= 10)
+   if (angular_data.rot_count >= 7)
    {
-    // Braking:
-   braking_setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
+    // Braking
+   braking_setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data); // Brakes TW and Stops
    }
-  
+
+   //=========================================================================// 
+
+
+   
+
+  // =======CASE 2: Start -> Accelerate -> Set Velocity -> Brake if velocity exceeds/Accelerate if velocity reduces -> Stop after 10 revolutions 
+  //=====================================TWO==================================// 
+
+//  if ((angular_data.rot_count < 10)&&(angular_data.velocity <= SP_angvel))  // 
+//   {
+//    // Acceleration
+//    setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
+//   }
+//
+//   if ((angular_data.rot_count < 10)&&(angular_data.velocity > SP_angvel))  // 
+//   {
+//    // Brake Momentarily
+//    intermittent_braking_setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
+//   }
+//   
+//   if (angular_data.rot_count >= 10) 
+//   {
+//    // Brake and Stop
+//   braking_setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
+//   }
+
+   //=========================================================================// 
+
+
+
+  // Constant Amplitude Acceleration
+  //  amplitude_from_angle(pid1,pid2,pid3,pid4,angular_data);
  
    control_mass(pid1,lidar1,motor1);
    control_mass(pid2,lidar2,motor2);
@@ -376,23 +407,6 @@ void init_motors()
   digitalWrite(motor4.MS1_pin, motor4.MS1_val);
   digitalWrite(motor4.MS2_pin, motor4.MS2_val);
   digitalWrite(motor4.MS3_pin, motor4.MS3_val);
-
-//    stepper1.setMaxSpeed(200.0);
-//    stepper1.setAcceleration(100.0);
-//    stepper1.moveTo(24);
-//    
-//    stepper2.setMaxSpeed(200.0);
-//    stepper2.setAcceleration(100.0);
-//    stepper2.moveTo(1000000);
-//    
-//    stepper3.setMaxSpeed(200.0);
-//    stepper3.setAcceleration(100.0);
-//    stepper3.moveTo(1000000); 
-//
-//    stepper4.setMaxSpeed(200.0);
-//    stepper4.setAcceleration(100.0);
-//    stepper4.moveTo(24);
-  
 }
 
 void resetBEDPins()
@@ -734,7 +748,7 @@ void init_pid_controls(pidInfo &p1, pidInfo &p2, pidInfo &p3, pidInfo &p4)
   control.u = control.p + control.i + control.d;
  //  Serial.print("U = "); Serial.print(control.u); Serial.print('\t');//delay(500);
 
-  if(control.u >= 0)                       //***!!!#### determine motor direction
+  if(control.u >= 0)                     
   {
     motor.dir_val = LOW;
    // delay(60);
@@ -1138,35 +1152,144 @@ if (((0 + CONE_WIDTH) > data.curr_angle && data.curr_angle > 0)||(361 > data.cur
     }
    }
 
-void amplitude_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &pid4, angleData &data)
+void intermittent_braking_setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &pid4, angleData &data)
+// ASSUMES THAT YOU WANT TO BRAKE BY SPINNING ANTICLOCKWISE!!!!
 {
-  // Amplitude as a function of angular velocity
-  // End points of amplitude as a function of angle 
+
+  // IF OUTSIDE THE CONE, DO NOTHING!!!
+//  if (((90 + CONE_WIDTH) < (data.curr_angle) && (data.curr_angle) < (270 - CONE_WIDTH))||((data.curr_angle) > (270 + CONE_WIDTH) || (data.curr_angle) < (90 - CONE_WIDTH)))
+//    {
+////        pid1.kp=1;
+////      pid1.ki=0.0001;
+////      pid1.kd=0.0001;
+//    }
+//
+//
+//  // IF INSIDE THE CONE, DO SOMETHING!!!
+//  else
+//    {
+      
+    if ((abs(data.velocity)<=SP_angvel)&&(abs(data.velocity) > 0.9))   // When current angvel less than desired angvel
+    {
+      // lower angle check
+      if ((270 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (270 - CONE_WIDTH))
+      {
+//        pid1.kp=1;
+//        pid1.ki=0.0001;
+//        pid1.kd=0.0001;
+        pid1.sp = MAX_SETPOINT;
+        pid2.sp = MIN_SETPOINT;
+        pid3.sp = MAX_SETPOINT; // assume pid1 is left motor and up
+        pid4.sp = MIN_SETPOINT;
+        pid1.i = 0;
+        pid1.pe = 0;
+        pid2.i = 0;
+        pid2.pe = 0;
+        pid3.i = 0;
+        pid3.pe = 0;
+        pid4.i = 0;
+        pid4.pe = 0;
+      }
+
+if ((180 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (180 - CONE_WIDTH))
+      {
+//        pid1.kp=1;
+//        pid1.ki=0.0001;
+//        pid1.kd=0.0001;
+        pid1.sp = MIN_SETPOINT;
+        pid2.sp = MAX_SETPOINT;
+        pid3.sp = MAX_SETPOINT; // assume pid1 is left motor and up
+        pid4.sp = MIN_SETPOINT;
+        pid1.i = 0;
+        pid1.pe = 0;
+        pid2.i = 0;
+        pid2.pe = 0;
+        pid3.i = 0;
+        pid3.pe = 0;
+        pid4.i = 0;
+        pid4.pe = 0;
+      }
+      
+
+      // upper angle check
+if ((90 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (90 - CONE_WIDTH))
+      {
+//        pid1.kp=1;                                  
+//        pid1.ki=0.0001;                                      
+//        pid1.kd=0.0001;                                   
+        pid1.sp = MIN_SETPOINT;
+        pid2.sp = MAX_SETPOINT;
+        pid3.sp = MIN_SETPOINT; // assume pid1 is left motor and up
+        pid4.sp = MAX_SETPOINT;
+        pid1.i = 0;
+        pid1.pe = 0;
+        pid2.i = 0;
+        pid2.pe = 0;
+        pid3.i = 0;
+        pid3.pe = 0;
+        pid4.i = 0;
+        pid4.pe = 0;
+      }
+    
+if (((0 + CONE_WIDTH) > data.curr_angle && data.curr_angle > 0)||(361 > data.curr_angle && data.curr_angle > (360 - CONE_WIDTH)))
+      {
+//        pid1.kp=1;                                  
+//        pid1.ki=0.0001;                                      
+//        pid1.kd=0.0001;                                   
+        pid1.sp = MAX_SETPOINT;
+        pid2.sp = MIN_SETPOINT;
+        pid3.sp = MIN_SETPOINT; // assume pid1 is left motor and up
+        pid4.sp = MAX_SETPOINT;
+        pid1.i = 0;
+        pid1.pe = 0;
+        pid2.i = 0;
+        pid2.pe = 0;
+        pid3.i = 0;
+        pid3.pe = 0;
+        pid4.i = 0;
+        pid4.pe = 0;
+      }
+    }
+  
+    if (abs(data.velocity) > SP_angvel*1.7)
+    {
+//     pid1.kp = 0;                                        // 2.28   //Marginally Stable at 6       Kp 3.6   
+//     pid1.ki = 0.0;                                      // .1 // .25                                 0.3
+//     pid1.kd = 0;
+      pid1.sp = (MAX_SETPOINT + MIN_SETPOINT)/2;
+      pid2.sp = (MAX_SETPOINT + MIN_SETPOINT)/2;
+      pid3.sp = (MAX_SETPOINT + MIN_SETPOINT)/2;
+      pid4.sp = (MAX_SETPOINT + MIN_SETPOINT)/2;
+    }
+    
+   }
 
 
-}
+
+//**********************************************    TBD    ***************************************************
+//void amplitude_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &pid4, angleData &data)
+//{
+//
+//  
+//  
+//}
+
 
  void printfunc()
 {
   //Time Angle Dist 1 Dist 2 PWM1 PWM2  
   //t2=millis();
-  Serial.print("Time:");Serial.print(millis()-t2);Serial.print("\t");
+  Serial.print("Time:");Serial.print(millis());Serial.print("\t");Serial.print(millis()-t2);Serial.print("\t");
   t2=millis();
-  Serial.print("Angle:");Serial.print(angular_data.curr_angle);Serial.print("\t");
-  Serial.print("Ang Rate:");Serial.print(angular_data.velocity);Serial.print("\t");
-  Serial.print("Dist1:");Serial.print(lidar1.d);Serial.print("\t");
-  Serial.print("Dist2:");Serial.print(lidar2.d);Serial.print("\t");
-  Serial.print("Dist3:");Serial.print(lidar3.d);Serial.print("\t");
-  Serial.print("Dist4:");Serial.print(lidar4.d);Serial.print("\t");
-  Serial.print("Completed Rot:");Serial.print(angular_data.rot_count);Serial.print("\n");
+  Serial.print("Ang:");Serial.print(angular_data.curr_angle);Serial.print("\t");
+  Serial.print("AngRate:");Serial.print(angular_data.velocity);Serial.print("\t");
+  Serial.print("D1:");Serial.print(lidar1.d);Serial.print("\t");
+  Serial.print("D2:");Serial.print(lidar2.d);Serial.print("\t");
+  Serial.print("D3:");Serial.print(lidar3.d);Serial.print("\t");
+  Serial.print("D4:");Serial.print(lidar4.d);Serial.print("\t");
+  Serial.print("N:");Serial.print(angular_data.rot_count);Serial.print("\n");
   //delay(1000);
 
-  //  Serial.print("Count = "); Serial.print(count); Serial.print('\t');
-//  Serial.print("T0 = "); Serial.print(timec); Serial.print('\t');
-//  Serial.print("D1 = "); Serial.print(lidar1.d); Serial.print('\t'); Serial.print("T1 = "); Serial.print(time1 - timec); Serial.print('\t');
-//  Serial.print("D2 = "); Serial.print(lidar2.d); Serial.print('\t'); Serial.print("T2 = "); Serial.print(time2 - time1); Serial.print('\t');
-//  Serial.print("D3 = "); Serial.print(lidar3.d); Serial.print('\t'); Serial.print("T3 = "); Serial.print(time3 - time2); Serial.print('\t');
-//  Serial.print("D4 = "); Serial.print(lidar4.d); Serial.print('\t'); Serial.print("T4 = "); Serial.print(time4 - time3); Serial.print('\n');
 }
 
 
