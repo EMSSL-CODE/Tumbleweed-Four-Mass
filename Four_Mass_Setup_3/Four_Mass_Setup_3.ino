@@ -756,7 +756,7 @@ void init_pid_controls(pidInfo &p1, pidInfo &p2, pidInfo &p3, pidInfo &p4)
    // delay(60);
     motor.step_interval=1;
     char d='h';
-    Serial.print(motor.dir_val);
+  //  Serial.print(motor.dir_val);
   }
   else
   {
@@ -764,7 +764,7 @@ void init_pid_controls(pidInfo &p1, pidInfo &p2, pidInfo &p3, pidInfo &p4)
     //delay(60);
     motor.step_interval=1;
     char d='l';
-    Serial.print(motor.dir_val);
+  //  Serial.print(motor.dir_val);
   }
 //Serial.print("DIR = "); Serial.print(motor.dir_val); Serial.print('\n');
   motor.step_interval = abs(control.u);          //***!!!#### Motor RPM vs delay (See recorded values)
@@ -814,7 +814,10 @@ void calculate_angular_data(angleData &data)
   // old code 
   // data.velocity = 1000*(data.prev_angle - data.curr_angle)/((data.prev_time - data.curr_time));
   float vel = 1000*(data.prev_angle - data.curr_angle)/((data.prev_time - data.curr_time));
-
+  if (((data.prev_angle-data.curr_angle) > 0)&&(abs(data.curr_angle) > 355))
+  {
+    data.rot_count = data.rot_count + 1;
+  }
   data.prev_time = data.curr_time;
   data.prev_angle = data.curr_angle;
 
@@ -869,16 +872,16 @@ void calculate_angular_data(angleData &data)
   // moving average
   data.velocity = (data.a0 + data.a1 + data.a2 + data.a3 + data.a4 + data.a5 + data.a6 + data.a7 + data.a8 + data.a9)/10;
 
-  if (data.curr_angle > 270)
-  { 
-    k=data.curr_angle-temp_ang;
-    if (k < 0)
-     {
-      data.rot_count = data.rot_count + 1;
-      temp_ang = data.curr_angle;
-     }
-  }
-  
+//  if (data.curr_angle > 270)
+//  { 
+//    k=data.curr_angle-temp_ang;
+//    if (k < 0)
+//     {
+//      data.rot_count = data.rot_count + 1;
+//      temp_ang = data.curr_angle;
+//     }
+//  }
+//  
 }
 
 void init_accelerometer()
