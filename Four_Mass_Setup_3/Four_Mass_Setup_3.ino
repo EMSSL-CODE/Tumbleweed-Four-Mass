@@ -11,6 +11,8 @@
 #include <stdarg.h>
 #include <math.h>  
 
+int k;
+float temp_ang;
 
 // Setpoint Angular Velocity
 #define SP_angvel                100.00f  // deg/s  (60 = 10rpm)  (90 = 15rpm)
@@ -232,15 +234,15 @@ void loop()
    accell();
    read_lidars();                                           // gets and reads lidars
 
-  // =======CASE 1: Start -> Accelerate -> 10(n) Rotations -> Brake -> Stop  
+  // =======CASE 1: Start -> Accelerate -> 6(n) Rotations -> Brake -> Stop  
   //=====================================ONE==================================// 
 
-  if (angular_data.rot_count < 7)  
+  if (angular_data.rot_count < 6)  
    {
     // Acceleration
     setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);  // Accelerates TW
    }
-   if (angular_data.rot_count >= 7)
+   if (angular_data.rot_count >= 6)
    {
     // Braking
    braking_setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data); // Brakes TW and Stops
@@ -867,7 +869,16 @@ void calculate_angular_data(angleData &data)
   // moving average
   data.velocity = (data.a0 + data.a1 + data.a2 + data.a3 + data.a4 + data.a5 + data.a6 + data.a7 + data.a8 + data.a9)/10;
 
-  data.rot_count=data.rot_count+ data.curr_angle/360;
+  if (data.curr_angle > 270)
+  { 
+    k=data.curr_angle-temp_ang;
+    if (k < 0)
+     {
+      data.rot_count = data.rot_count + 1;
+      temp_ang = data.curr_angle;
+     }
+  }
+  
 }
 
 void init_accelerometer()
@@ -1288,6 +1299,7 @@ if (((0 + CONE_WIDTH) > data.curr_angle && data.curr_angle > 0)||(361 > data.cur
   Serial.print("D3:");Serial.print(lidar3.d);Serial.print("\t");
   Serial.print("D4:");Serial.print(lidar4.d);Serial.print("\t");
   Serial.print("N:");Serial.print(angular_data.rot_count);Serial.print("\n");
+ // Serial.print("N:");Serial.print(angular_data.rot_count);Serial.print("\n");
   //delay(1000);
 
 }
