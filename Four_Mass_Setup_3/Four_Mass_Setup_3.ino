@@ -98,6 +98,8 @@ int tempvar = 1;
 #define Kd4                 0.00
 #define MIN_SETPOINT        25.0f // 10.0f   ******MEASURE AND CHANGE THESE NUMBERS
 #define MAX_SETPOINT        55.0f // 40.0f   ******MEASURE AND CHANGE THESE NUMBERS
+#define SP_mean             (MAX_SETPOINT + MIN_SETPOINT)/2;
+#define MAX_AMPLITUDE       15.0f
 
 // Accelerometer Definitions
 #define xInput              (A2)    // x acceleration, 0-1023 returned
@@ -235,7 +237,7 @@ void loop()
    read_lidars();                                           // gets and reads lidars
 
   // =======CASE 1: Start -> Accelerate -> 6(n) Rotations -> Brake -> Stop  
-  //=====================================ONE==================================// 
+  //===================================== O N E ==================================// 
 
   if (angular_data.rot_count < 6)  
    {
@@ -253,8 +255,10 @@ void loop()
 
    
 
-  // =======CASE 2: Start -> Accelerate -> Set Velocity -> Brake if velocity exceeds/Accelerate if velocity reduces -> Stop after 10 revolutions 
-  //=====================================TWO==================================// 
+  // =======CASE 2: Start -> Accelerate -> Set Velocity -> 
+  // -> Brake if velocity exceeds/Accelerate if velocity reduces -> 
+  // -> Stop after 10 revolutions 
+  //===================================== T W O ==================================// 
 
 //  if ((angular_data.rot_count < 10)&&(angular_data.velocity <= SP_angvel))  // 
 //   {
@@ -277,9 +281,16 @@ void loop()
    //=========================================================================// 
 
 
+   
 
-  // Constant Amplitude Acceleration
-  //  amplitude_from_angle(pid1,pid2,pid3,pid4,angular_data);
+  // =======CASE 3: Start -> Accelerate to set velocity (linear path) ->
+  // -> Maintain set velocity by small amplitude motions ->  Stop after 10 revolutions( stopping function not yet written)
+  //===================================== T H R E E ==================================// 
+
+//  // Constant Amplitude Acceleration
+//    amplitude_from_angle(pid1,pid2,pid3,pid4,angular_data);
+
+ //=========================================================================//
  
    control_mass(pid1,lidar1,motor1);
    control_mass(pid2,lidar2,motor2);
@@ -822,7 +833,7 @@ void calculate_angular_data(angleData &data)
   data.prev_angle = data.curr_angle;
 
 //  Serial.print("w = "); Serial.print(data.velocity); Serial.print('\t');
-   if ( vel > 1000 )
+   if ( abs(vel) > 400 )
    {
     vel=data.velocity;
    }
@@ -1280,13 +1291,104 @@ if (((0 + CONE_WIDTH) > data.curr_angle && data.curr_angle > 0)||(361 > data.cur
 
 
 
-//**********************************************    TBD    ***************************************************
-//void amplitude_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &pid4, angleData &data)
-//{
-//
-//  
-//  
-//}
+void amplitude_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &pid4, angleData &data)
+{
+
+    if (abs(data.velocity)<=SP_angvel)   // When current angvel less than desired angvel
+    {
+      // lower angle check
+      if ((270 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (270 - CONE_WIDTH))
+      {
+//        pid1.kp=1;
+//        pid1.ki=0.0001;
+//        pid1.kd=0.0001;
+
+        pid1.sp = SP_mean + MAX_AMPLITUDE*(1 - (data.velocity/SP_angvel));
+        pid2.sp = SP_mean - MAX_AMPLITUDE*(1 - (data.velocity/SP_angvel));
+        pid3.sp = SP_mean - MAX_AMPLITUDE*(1 - (data.velocity/SP_angvel)); // assume pid1 is left motor and up
+        pid4.sp = SP_mean + MAX_AMPLITUDE*(1 - (data.velocity/SP_angvel));
+        pid1.i = 0;
+        pid1.pe = 0;
+        pid2.i = 0;
+        pid2.pe = 0;
+        pid3.i = 0;
+        pid3.pe = 0;
+        pid4.i = 0;
+        pid4.pe = 0;
+      }
+
+if ((180 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (180 - CONE_WIDTH))
+      {
+//        pid1.kp=1;
+//        pid1.ki=0.0001;
+//        pid1.kd=0.0001;
+        pid1.sp = SP_mean - MAX_AMPLITUDE*(1 - (data.velocity/SP_angvel));
+        pid2.sp = SP_mean + MAX_AMPLITUDE*(1 - (data.velocity/SP_angvel));
+        pid3.sp = SP_mean - MAX_AMPLITUDE*(1 - (data.velocity/SP_angvel)); // assume pid1 is left motor and up
+        pid4.sp = SP_mean + MAX_AMPLITUDE*(1 - (data.velocity/SP_angvel));
+        pid1.i = 0;
+        pid1.pe = 0;
+        pid2.i = 0;
+        pid2.pe = 0;
+        pid3.i = 0;
+        pid3.pe = 0;
+        pid4.i = 0;
+        pid4.pe = 0;
+      }
+      
+
+      // upper angle check
+if ((90 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (90 - CONE_WIDTH))
+      {
+//        pid1.kp=1;                                  
+//        pid1.ki=0.0001;                                      
+//        pid1.kd=0.0001;                                   
+        pid1.sp = SP_mean - MAX_AMPLITUDE*(1 - (data.velocity/SP_angvel));
+        pid2.sp = SP_mean + MAX_AMPLITUDE*(1 - (data.velocity/SP_angvel));
+        pid3.sp = SP_mean + MAX_AMPLITUDE*(1 - (data.velocity/SP_angvel)); // assume pid1 is left motor and up
+        pid4.sp = SP_mean - MAX_AMPLITUDE*(1 - (data.velocity/SP_angvel));
+        pid1.i = 0;
+        pid1.pe = 0;
+        pid2.i = 0;
+        pid2.pe = 0;
+        pid3.i = 0;
+        pid3.pe = 0;
+        pid4.i = 0;
+        pid4.pe = 0;
+      }
+    
+if (((0 + CONE_WIDTH) > data.curr_angle && data.curr_angle > 0)||(361 > data.curr_angle && data.curr_angle > (360 - CONE_WIDTH)))
+      {
+//        pid1.kp=1;                                  
+//        pid1.ki=0.0001;                                      
+//        pid1.kd=0.0001;                                   
+        pid1.sp = SP_mean + MAX_AMPLITUDE*(1 - (data.velocity/SP_angvel));;
+        pid2.sp = SP_mean - MAX_AMPLITUDE*(1 - (data.velocity/SP_angvel));;
+        pid3.sp = SP_mean + MAX_AMPLITUDE*(1 - (data.velocity/SP_angvel));; // assume pid1 is left motor and up
+        pid4.sp = SP_mean - MAX_AMPLITUDE*(1 - (data.velocity/SP_angvel));;
+        pid1.i = 0;
+        pid1.pe = 0;
+        pid2.i = 0;
+        pid2.pe = 0;
+        pid3.i = 0;
+        pid3.pe = 0;
+        pid4.i = 0;
+        pid4.pe = 0;
+      }
+    }
+  
+//    if (abs(data.velocity) > SP_angvel*1.7)
+//    {
+////     pid1.kp = 0;                                        // 2.28   //Marginally Stable at 6       Kp 3.6   
+////     pid1.ki = 0.0;                                      // .1 // .25                                 0.3
+////     pid1.kd = 0;
+//      pid1.sp = (MAX_SETPOINT + MIN_SETPOINT)/2;
+//      pid2.sp = (MAX_SETPOINT + MIN_SETPOINT)/2;
+//      pid3.sp = (MAX_SETPOINT + MIN_SETPOINT)/2;
+//      pid4.sp = (MAX_SETPOINT + MIN_SETPOINT)/2;
+//    }
+  
+}
 
 
  void printfunc()
