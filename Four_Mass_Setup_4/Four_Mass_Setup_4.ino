@@ -10,6 +10,12 @@
 #include <LIDARLite.h>
 #include <stdarg.h>
 #include <math.h>  
+#include <Adafruit_Sensor.h>
+#include <Adafruit_LSM303_U.h>
+#include <Adafruit_9DOF.h>
+#include <Adafruit_L3GD20_U.h>
+#include <MahonyAHRS.h>
+#include <MadgwickAHRS.h>
 
 int k;
 float temp_ang;
@@ -109,15 +115,26 @@ int tempvar = 1;
 #define sampleSize           2
 
 
+Adafruit_9DOF                 dof   = Adafruit_9DOF();
+Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(30301);
+Adafruit_LSM303_Mag_Unified   mag   = Adafruit_LSM303_Mag_Unified(30302);
+Adafruit_L3GD20_Unified       gyro(20);
+
+
+
 // Raw Ranges for Accelerometer
-int zRawMin = 401;
-int zRawMax = 664;
+// Offsets applied to raw x/y/z values
+float mag_offsets[3]            = { -13.55F, -44.26F, 1.52F };
 
-int yRawMin = 396;
-int yRawMax = 633;
+// Soft iron error compensation matrix
+float mag_softiron_matrix[3][3] = { { 0.890, 0.090, 0.025 },
+                                    { 0.090, 1.237, 0.246 },
+                                    { 0.025, 0.246, 0.964 } }; 
 
-int xRawMin = 396;
-int xRawMax = 617;
+float mag_field_strength        = 58.69F;
+
+Madgwick filter;
+
 
 int cone_state = 0;
 
@@ -235,7 +252,7 @@ void setup()
 
 void loop()
 {
-   accell();
+   IMU();
    read_lidars();                                           // gets and reads lidars
 
   // =======CASE 1: Start -> Accelerate -> 6(n) Rotations -> Brake -> Stop  
@@ -848,76 +865,94 @@ void calculate_angular_data(angleData &data)
 //  
 }
 
+//
 void init_accelerometer()
 {
-  analogReference(EXTERNAL);
-  // raw ranges
-  int zRawMin = 401;
-  int zRawMax = 664;
-  
-  int yRawMin = 396;
-  int yRawMax = 633;
-  
-  int xRawMin = 396;
-  int xRawMax = 617;
+
+if (!accel.begin())
+  {
+    /* There was a problem detecting the LSM303 ... check your connections */
+    Serial.println(F("No LSM303 detected. Check wiring!"));
+    while (1);
+  }
+  if (!mag.begin())
+  {
+    /* There was a problem detecting the LSM303 ... check your connections */
+    Serial.println("No LSM303 detected ... Check wiring!");
+    while (1);
+  }
  
 }
 
-void accell()
+void IMU()
 {
+  double angDEG;
   // int xRaw = ReadAxis(xInput);
-  int yRaw = ReadAxis(yInput);
-  int zRaw = ReadAxis(zInput);
+  sensors_event_t gyro_event;
+  sensors_event_t accel_event;
+  sensors_event_t mag_event;
+  sensors_vec_t   orientation;
 
-  // // Convert raw values to g fractions
-  // long xScaled = map(xRaw, xRawMin, xRawMax, -1000, 1000);
-  long yScaled = map(yRaw, yRawMin, yRawMax, -1000, 1000);
-  long zScaled = map(zRaw, zRawMin, zRawMax, -1000, 1000);
+  /* Read the accelerometer and magnetometer */
+  accel.getEvent(&accel_event);
+  mag.getEvent(&mag_event);
+  /* Read the gyro */
+  gyro.getEvent(&gyro_event);
 
-  // Calculate angle
-  double ang = atan2((double) zScaled, (double) yScaled);
-  double angDEG = ang*180/3.1415927 - 95; // 90 for axis, 5 from calibration
+  // Apply mag offset compensation (base values in uTesla)
+  float x = mag_event.magnetic.x - mag_offsets[0];
+  float y = mag_event.magnetic.y - mag_offsets[1];
+  float z = mag_event.magnetic.z - mag_offsets[2];
 
-  // constrain between 0 and 360
-  if (angDEG < 0)
+  // Apply mag soft iron error compensation
+  float mx = x * mag_softiron_matrix[0][0] + y * mag_softiron_matrix[0][1] + z * mag_softiron_matrix[0][2];
+  float my = x * mag_softiron_matrix[1][0] + y * mag_softiron_matrix[1][1] + z * mag_softiron_matrix[1][2];
+  float mz = x * mag_softiron_matrix[2][0] + y * mag_softiron_matrix[2][1] + z * mag_softiron_matrix[2][2];
+
+  // The filter library expects gyro data in degrees/s, but adafruit sensor
+  // uses rad/s so we need to convert them first (or adapt the filter lib
+  // where they are being converted)
+  float gx = gyro_event.gyro.x * 57.2958F;
+  float gy = gyro_event.gyro.y * 57.2958F;
+  float gz = gyro_event.gyro.z * 57.2958F;
+
+  // Update the filter
+  filter.update(gx, gy, gz,
+                accel_event.acceleration.x, accel_event.acceleration.y, accel_event.acceleration.z,
+                mx, my, mz);
+
+  // Print the orientation filter output
+  float roll = filter.getRoll();
+
+
+  //  /* Use the new fusionGetOrientation function to merge accel/mag data */
+  dof.fusionGetOrientation(&accel_event, &mag_event, &orientation);
+
+
+  // IMU Low Pass Filter
+  double ang = (1 - 0.3) * orientation.roll + 0.3 * ang;
+
+ if (ang < 0)
   {
-    angDEG = angDEG + 360;
+   angDEG = ang + 360;
   }
+ else 
+ {
+  angDEG=ang;
+ }
 
-//  Serial.print(angDEG); Serial.print('\n');
 
   angular_data.curr_angle = angDEG;
   calculate_angular_data(angular_data);
 }
 
-int ReadAxis(int axisPin) 
-{
-  long reading = 0;
-  analogRead(axisPin);
-  delay(1);
-  for (int i = 0; i < sampleSize; i++) {
-    reading += analogRead(axisPin);
-  }
-  return reading/sampleSize;
-}
+
 
 void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &pid4, angleData &data)
 // ASSUMES THAT YOU WANT TO SPIN CLOCKWISE!!!!
 {
 
-  // IF OUTSIDE THE CONE, DO NOTHING!!!
-//  if (((90 + CONE_WIDTH) < (data.curr_angle) && (data.curr_angle) < (270 - CONE_WIDTH))||((data.curr_angle) > (270 + CONE_WIDTH) || (data.curr_angle) < (90 - CONE_WIDTH)))
-//    {
-////        pid1.kp=1;
-////      pid1.ki=0.0001;
-////      pid1.kd=0.0001;
-//    }
-//
-//
-//  // IF INSIDE THE CONE, DO SOMETHING!!!
-//  else
-//    {
-      
+
     if (abs(data.velocity)<=SP_angvel)   // When current angvel less than desired angvel
     {
       // lower angle check

@@ -7,7 +7,7 @@
 #define MS1_1                   (2)      //Finer Motor control
 #define MS2_1                   (3)      //Finer Motor control
 #define MS3_1                   (4)      //Finer Motor control
-int num=320;
+int num=270;
 int x=0;
 int j=1;
 int iter=0;
@@ -51,7 +51,7 @@ if (y<0)
 }
 Serial.println(y);
 x=abs(y);
-    if (x>50 || x<3)
+    if (x>55 || x<3)
     {
       digitalWrite(EN1, HIGH);
     

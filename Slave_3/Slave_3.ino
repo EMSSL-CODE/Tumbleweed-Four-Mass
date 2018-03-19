@@ -51,7 +51,7 @@ if (y<0)
 }
 Serial.println(y);
 x=abs(y);
-    if (x>50 || x<3)
+    if (x>55 || x<3)
     {
       digitalWrite(EN1, HIGH);
     
