@@ -133,8 +133,8 @@ float mag_softiron_matrix[3][3] = { { 0.890, 0.090, 0.025 },
 
 float mag_field_strength        = 58.69F;
 
-Madgwick filter;
-
+//Madgwick filter;
+Mahony filter;
 
 int cone_state = 0;
 
