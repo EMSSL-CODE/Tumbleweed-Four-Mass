@@ -40,7 +40,7 @@ float temp_ang;
 int tempvar = 1;
 #define STEP_INT_MAX             330
 
-#define inPin                   (31)
+int inPin = 49;
 
 #define dir1                    (43)      //Direction
 #define stp1                    (37)      //Step
@@ -92,9 +92,9 @@ int tempvar = 1;
 
 
 // Controller Definitions (PID)
-#define Kp1                 1// 2.28   //Marginally Stable at 6       Kp 3.6   
-#define Ki1                 0.00// .1 // .25                                 0.3
-#define Kd1                 0.00// 0 // .05 // .1667                         0.075
+#define Kp1                 1.09// 2.28   //Marginally Stable at 6       Kp 3.6   
+#define Ki1                 0.0// .1 // .25                                 0.3
+#define Kd1                 30// 0 // .05 // .1667                         0.075
 #define Kp2                 1
 #define Ki2                 0.00
 #define Kd2                 0.00
@@ -717,9 +717,13 @@ void setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pidInfo &p
 // ASSUMES THAT YOU WANT TO SPIN CLOCKWISE!!!!
 {
 
+
 int val = digitalRead(inPin);
 
-      if (val == HIGH)
+
+
+
+      if (val == LOW)
       {
 
         pid1.sp = MAX_SETPOINT;
@@ -729,7 +733,7 @@ int val = digitalRead(inPin);
    
       }
 
-      if (val == LOW)
+      else
       {   
         
         pid1.sp = MIN_SETPOINT;
