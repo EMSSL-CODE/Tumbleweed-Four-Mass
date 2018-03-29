@@ -90,11 +90,11 @@ int inPin = 49;
 #define LIDAR_MODE                  2 // default range, faster acquisition
 #define LIDAR_FILT                  0.87
 
-
+// ***************************************************************************************************************************************************************************************
 // Controller Definitions (PID)
-#define Kp1                 1.09// 2.28   //Marginally Stable at 6       Kp 3.6   
-#define Ki1                 0.0// .1 // .25                                 0.3
-#define Kd1                 30// 0 // .05 // .1667                         0.075
+#define Kp1                 1.05// 2.28   //Marginally Stable at 6       Kp 3.6   speed .4-1 steps of .2
+#define Ki1                 0.0// .1 // .25                                 0.3  reduces error
+#define Kd1                 00// 0 // .05 // .1667                         0.075  damping 0,30,60
 #define Kp2                 1
 #define Ki2                 0.00
 #define Kd2                 0.00
@@ -752,26 +752,26 @@ int val = digitalRead(inPin);
   Serial.print(millis());Serial.print(" ,");
   t2=millis();
  // Serial.print("Ang:");
-  Serial.print(angular_data.curr_angle);Serial.print(" ,");
+//  Serial.print(angular_data.curr_angle);Serial.print(" ,");
 //  Serial.print("AngRate:");
-  Serial.print(angular_data.velocity);Serial.print(" ,");
+//  Serial.print(angular_data.velocity);Serial.print(" ,");
 //  Serial.print("S1:");
-  Serial.print(pid1.sp);Serial.print(" ,");
+//  Serial.print(pid1.sp);Serial.print(" ,");
 //  Serial.print("D1:");
   Serial.print(lidar1.d);Serial.print(" ,");
 //  Serial.print("S2:");
-  Serial.print(pid2.sp);Serial.print(" ,");
+  Serial.print(pid2.sp);Serial.println(" ,");
 //  Serial.print("D2:");
-  Serial.print(lidar2.d);Serial.print(" ,");
+//  Serial.print(lidar2.d);Serial.print(" ,");
 //  Serial.print("S3:");
-  Serial.print(pid3.sp);Serial.print(" ,");
+//  Serial.print(pid3.sp);Serial.print(" ,");
 //  Serial.print("D3:");
-  Serial.print(lidar3.d);Serial.print(" ,");
+//  Serial.print(lidar3.d);Serial.print(" ,");
 //  Serial.print("S4:");
-  Serial.print(pid4.sp);Serial.print(" ,");
+//  Serial.print(pid4.sp);Serial.print(" ,");
 //  Serial.print("D4:");
-  Serial.print(lidar4.d);Serial.print(" ,");
+//  Serial.print(lidar4.d);Serial.print(" ,");
 //  Serial.print("N:");
-  Serial.print(angular_data.rot_count);Serial.print("\n");
+//  Serial.print(angular_data.rot_count);Serial.print("\n");
 
 }
