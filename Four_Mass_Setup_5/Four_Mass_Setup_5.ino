@@ -89,16 +89,16 @@ int tempvar = 1;
 
 
 // Controller Definitions (PID)
-#define Kp1                 1// 2.28   //Marginally Stable at 6       Kp 3.6   
+#define Kp1                 1.01// 2.28   //Marginally Stable at 6       Kp 3.6   
 #define Ki1                 0.00// .1 // .25                                 0.3
 #define Kd1                 0.00// 0 // .05 // .1667                         0.075
-#define Kp2                 1
+#define Kp2                 1.01
 #define Ki2                 0.00
 #define Kd2                 0.00
-#define Kp3                 1
+#define Kp3                 1.01
 #define Ki3                 0.00
 #define Kd3                 0.0
-#define Kp4                 1
+#define Kp4                 1.01
 #define Ki4                 0.00
 #define Kd4                 0.00
 #define MIN_SETPOINT        25.0f // 10.0f   ******MEASURE AND CHANGE THESE NUMBERS
@@ -221,6 +221,7 @@ byte temp[2];
 void setup() 
 {
   Serial.begin(19200);
+
   init_motors();
   init_lidars();
   init_accelerometer();
@@ -233,6 +234,7 @@ void setup()
 
 void loop()
 {
+
    IMU();
    read_lidars();                                           // gets and reads lidars
 
@@ -1353,6 +1355,7 @@ if (((0 + CONE_WIDTH) > data.curr_angle && data.curr_angle > 0)||(361 > data.cur
   Serial.print(lidar4.d);Serial.print(" ,");
 //  Serial.print("N:");
   Serial.print(angular_data.rot_count);Serial.print("\n");
+
 
 }
 
