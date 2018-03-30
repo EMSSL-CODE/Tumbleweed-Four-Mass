@@ -114,7 +114,7 @@ int tempvar = 1;
 #define sampleSize           2
 
 
-Adafruit_BNO055 bno = Adafruit_BNO055(55);
+Adafruit_BNO055 bno = Adafruit_BNO055(75);
 
 
 int cone_state = 0;
@@ -234,7 +234,11 @@ void setup()
 void loop()
 {
    IMU();
-   read_lidars();                                           // gets and reads lidars
+   if (angular_data.curr_angle != 359.94)
+   {
+   read_lidars();        
+           
+   // gets and reads lidars
 
   // =======CASE 1: Start -> Accelerate -> 6(n) Rotations -> Brake -> Stop  
   //===================================== O N E ==================================// 
@@ -298,6 +302,7 @@ void loop()
    control_mass(pid4,lidar4,motor4);
    
    printfunc();
+   }
 }
 // ********************************************************************************************************
 void init_motors()
@@ -776,63 +781,65 @@ void calculate_angular_data(angleData &data)
   // old code 
   // data.velocity = 1000*(data.prev_angle - data.curr_angle)/((data.prev_time - data.curr_time));
   float vel = 1000*(data.prev_angle - data.curr_angle)/((data.prev_time - data.curr_time));
-  if (((data.prev_angle-data.curr_angle) > 0)&&(abs(data.curr_angle) > 345))
-  {
-    data.rot_count = data.rot_count + 1;
-  }
-  data.prev_time = data.curr_time;
-  data.prev_angle = data.curr_angle;
+//  if (((data.prev_angle-data.curr_angle) > 0)&&(abs(data.curr_angle) > 345))
+//  {
+//    data.rot_count = data.rot_count + 1;
+//  }
+//  data.prev_time = data.curr_time;
+//  data.prev_angle = data.curr_angle;
+//
+////  Serial.print("w = "); Serial.print(data.velocity); Serial.print('\t');
+//   if ( abs(vel) > 200 )
+//   {
+//    vel=data.velocity;
+//   }
+//  // calculate average velocity
+//  switch (data.cntr) {
+//    case 0:
+//      data.a0 = vel;
+//      data.cntr = data.cntr + 1;
+//      break;
+//    case 1:
+//      data.a1 = vel;
+//      data.cntr = data.cntr + 1;
+//      break;
+//    case 2:
+//      data.a2 = vel;
+//      data.cntr = data.cntr + 1;
+//      break;
+//    case 3:
+//      data.a3 = vel;
+//      data.cntr = data.cntr + 1;
+//      break;
+//    case 4:
+//      data.a4 = vel;
+//      data.cntr = data.cntr + 1;
+//      break;
+//    case 5:
+//      data.a5 = vel;
+//      data.cntr = data.cntr + 1;
+//      break;
+//    case 6:
+//      data.a6 = vel;
+//      data.cntr = data.cntr + 1;
+//      break;
+//    case 7:
+//      data.a7 = vel;
+//      data.cntr = data.cntr + 1;
+//      break;
+//    case 8:
+//      data.a8 = vel;
+//      data.cntr = data.cntr + 1;
+//      break;
+//    case 9:
+//      data.a9 = vel;
+//      data.cntr = 0;
+//      break;
+//  }
+//  // moving average
+//  data.velocity = (data.a0 + data.a1 + data.a2 + data.a3 + data.a4 + data.a5 + data.a6 + data.a7 + data.a8 + data.a9)/10;
 
-//  Serial.print("w = "); Serial.print(data.velocity); Serial.print('\t');
-   if ( abs(vel) > 200 )
-   {
-    vel=data.velocity;
-   }
-  // calculate average velocity
-  switch (data.cntr) {
-    case 0:
-      data.a0 = vel;
-      data.cntr = data.cntr + 1;
-      break;
-    case 1:
-      data.a1 = vel;
-      data.cntr = data.cntr + 1;
-      break;
-    case 2:
-      data.a2 = vel;
-      data.cntr = data.cntr + 1;
-      break;
-    case 3:
-      data.a3 = vel;
-      data.cntr = data.cntr + 1;
-      break;
-    case 4:
-      data.a4 = vel;
-      data.cntr = data.cntr + 1;
-      break;
-    case 5:
-      data.a5 = vel;
-      data.cntr = data.cntr + 1;
-      break;
-    case 6:
-      data.a6 = vel;
-      data.cntr = data.cntr + 1;
-      break;
-    case 7:
-      data.a7 = vel;
-      data.cntr = data.cntr + 1;
-      break;
-    case 8:
-      data.a8 = vel;
-      data.cntr = data.cntr + 1;
-      break;
-    case 9:
-      data.a9 = vel;
-      data.cntr = 0;
-      break;
-  }
-  // moving average
-  data.velocity = (data.a0 + data.a1 + data.a2 + data.a3 + data.a4 + data.a5 + data.a6 + data.a7 + data.a8 + data.a9)/10;
+data.velocity = vel;
 
 //  if (data.curr_angle > 270)
 //  { 
@@ -874,19 +881,20 @@ void IMU()
   float roll = event.orientation.z;
 
   // IMU Low Pass Filter
-  double ang = (1 - 0.3) * roll + 0.3 * ang;
+ // double ang = (1 - 0.3) * roll + 0.3 * ang;
 //
- if (ang < 0)
+ if (roll < 0)
   {
-   angDEG = ang + 360;
+   roll = roll + 360;
   }
- else 
- {
-  angDEG=ang;
- }
+// else 
+// {
+//  angDEG=ang;
+// }
 
+angular_data.curr_angle = roll;
 
-  angular_data.curr_angle = angDEG;
+ // angular_data.curr_angle = angDEG;
   calculate_angular_data(angular_data);
 }
 
@@ -1353,7 +1361,6 @@ if (((0 + CONE_WIDTH) > data.curr_angle && data.curr_angle > 0)||(361 > data.cur
   Serial.print(lidar4.d);Serial.print(" ,");
 //  Serial.print("N:");
   Serial.print(angular_data.rot_count);Serial.print("\n");
-
 }
 
 
