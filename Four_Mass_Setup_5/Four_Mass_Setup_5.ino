@@ -781,65 +781,65 @@ void calculate_angular_data(angleData &data)
   // old code 
   // data.velocity = 1000*(data.prev_angle - data.curr_angle)/((data.prev_time - data.curr_time));
   float vel = 1000*(data.prev_angle - data.curr_angle)/((data.prev_time - data.curr_time));
-//  if (((data.prev_angle-data.curr_angle) > 0)&&(abs(data.curr_angle) > 345))
-//  {
-//    data.rot_count = data.rot_count + 1;
-//  }
-//  data.prev_time = data.curr_time;
-//  data.prev_angle = data.curr_angle;
-//
-////  Serial.print("w = "); Serial.print(data.velocity); Serial.print('\t');
-//   if ( abs(vel) > 200 )
-//   {
-//    vel=data.velocity;
-//   }
-//  // calculate average velocity
-//  switch (data.cntr) {
-//    case 0:
-//      data.a0 = vel;
-//      data.cntr = data.cntr + 1;
-//      break;
-//    case 1:
-//      data.a1 = vel;
-//      data.cntr = data.cntr + 1;
-//      break;
-//    case 2:
-//      data.a2 = vel;
-//      data.cntr = data.cntr + 1;
-//      break;
-//    case 3:
-//      data.a3 = vel;
-//      data.cntr = data.cntr + 1;
-//      break;
-//    case 4:
-//      data.a4 = vel;
-//      data.cntr = data.cntr + 1;
-//      break;
-//    case 5:
-//      data.a5 = vel;
-//      data.cntr = data.cntr + 1;
-//      break;
-//    case 6:
-//      data.a6 = vel;
-//      data.cntr = data.cntr + 1;
-//      break;
-//    case 7:
-//      data.a7 = vel;
-//      data.cntr = data.cntr + 1;
-//      break;
-//    case 8:
-//      data.a8 = vel;
-//      data.cntr = data.cntr + 1;
-//      break;
-//    case 9:
-//      data.a9 = vel;
-//      data.cntr = 0;
-//      break;
-//  }
-//  // moving average
-//  data.velocity = (data.a0 + data.a1 + data.a2 + data.a3 + data.a4 + data.a5 + data.a6 + data.a7 + data.a8 + data.a9)/10;
+  if (((data.prev_angle-data.curr_angle) > 0)&&(abs(data.curr_angle) > 345))
+  {
+    data.rot_count = data.rot_count + 1;
+  }
+  data.prev_time = data.curr_time;
+  data.prev_angle = data.curr_angle;
 
-data.velocity = vel;
+//  Serial.print("w = "); Serial.print(data.velocity); Serial.print('\t');
+   if ( abs(vel) > 200 || data.curr_angle==359.94 || data.prev_angle==359.94 )
+   {
+    vel=data.velocity;
+   }
+  // calculate average velocity
+  switch (data.cntr) {
+    case 0:
+      data.a0 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 1:
+      data.a1 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 2:
+      data.a2 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 3:
+      data.a3 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 4:
+      data.a4 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 5:
+      data.a5 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 6:
+      data.a6 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 7:
+      data.a7 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 8:
+      data.a8 = vel;
+      data.cntr = data.cntr + 1;
+      break;
+    case 9:
+      data.a9 = vel;
+      data.cntr = 0;
+      break;
+  }
+  // moving average
+  data.velocity = (data.a0 + data.a1 + data.a2 + data.a3 + data.a4 + data.a5 + data.a6 + data.a7 + data.a8 + data.a9)/10;
+
+//data.velocity = vel;
 
 //  if (data.curr_angle > 270)
 //  { 
@@ -873,7 +873,7 @@ void IMU()
 
   sensors_event_t event;
   bno.getEvent(&event);
-  double angDEG;
+//  double angDEG;
   // int xRaw = ReadAxis(xInput);
   
 
