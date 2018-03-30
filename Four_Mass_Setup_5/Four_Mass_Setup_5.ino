@@ -89,16 +89,16 @@ int tempvar = 1;
 
 
 // Controller Definitions (PID)
-#define Kp1                 1.01// 2.28   //Marginally Stable at 6       Kp 3.6   
+#define Kp1                 1// 2.28   //Marginally Stable at 6       Kp 3.6   
 #define Ki1                 0.00// .1 // .25                                 0.3
 #define Kd1                 0.00// 0 // .05 // .1667                         0.075
-#define Kp2                 1.01
+#define Kp2                 1
 #define Ki2                 0.00
 #define Kd2                 0.00
-#define Kp3                 1.01
+#define Kp3                 1
 #define Ki3                 0.00
 #define Kd3                 0.0
-#define Kp4                 1.01
+#define Kp4                 1
 #define Ki4                 0.00
 #define Kd4                 0.00
 #define MIN_SETPOINT        25.0f // 10.0f   ******MEASURE AND CHANGE THESE NUMBERS
@@ -114,7 +114,7 @@ int tempvar = 1;
 #define sampleSize           2
 
 
-Adafruit_BNO055 bno = Adafruit_BNO055(55);
+Adafruit_BNO055 bno = Adafruit_BNO055(75);
 
 
 int cone_state = 0;
@@ -221,7 +221,6 @@ byte temp[2];
 void setup() 
 {
   Serial.begin(19200);
-
   init_motors();
   init_lidars();
   init_accelerometer();
@@ -234,9 +233,12 @@ void setup()
 
 void loop()
 {
-
    IMU();
-   read_lidars();                                           // gets and reads lidars
+   if (angular_data.curr_angle != 359.94)
+   {
+   read_lidars();        
+           
+   // gets and reads lidars
 
   // =======CASE 1: Start -> Accelerate -> 6(n) Rotations -> Brake -> Stop  
   //===================================== O N E ==================================// 
@@ -300,6 +302,7 @@ void loop()
    control_mass(pid4,lidar4,motor4);
    
    printfunc();
+   }
 }
 // ********************************************************************************************************
 void init_motors()
@@ -786,7 +789,7 @@ void calculate_angular_data(angleData &data)
   data.prev_angle = data.curr_angle;
 
 //  Serial.print("w = "); Serial.print(data.velocity); Serial.print('\t');
-   if ( abs(vel) > 200 )
+   if ( abs(vel) > 200 || data.curr_angle==359.94 || data.prev_angle==359.94 )
    {
     vel=data.velocity;
    }
@@ -836,6 +839,8 @@ void calculate_angular_data(angleData &data)
   // moving average
   data.velocity = (data.a0 + data.a1 + data.a2 + data.a3 + data.a4 + data.a5 + data.a6 + data.a7 + data.a8 + data.a9)/10;
 
+//data.velocity = vel;
+
 //  if (data.curr_angle > 270)
 //  { 
 //    k=data.curr_angle-temp_ang;
@@ -868,7 +873,7 @@ void IMU()
 
   sensors_event_t event;
   bno.getEvent(&event);
-  double angDEG;
+//  double angDEG;
   // int xRaw = ReadAxis(xInput);
   
 
@@ -876,19 +881,20 @@ void IMU()
   float roll = event.orientation.z;
 
   // IMU Low Pass Filter
-  double ang = (1 - 0.3) * roll + 0.3 * ang;
+ // double ang = (1 - 0.3) * roll + 0.3 * ang;
 //
- if (ang < 0)
+ if (roll < 0)
   {
-   angDEG = ang + 360;
+   roll = roll + 360;
   }
- else 
- {
-  angDEG=ang;
- }
+// else 
+// {
+//  angDEG=ang;
+// }
 
+angular_data.curr_angle = roll;
 
-  angular_data.curr_angle = angDEG;
+ // angular_data.curr_angle = angDEG;
   calculate_angular_data(angular_data);
 }
 
@@ -1355,21 +1361,7 @@ if (((0 + CONE_WIDTH) > data.curr_angle && data.curr_angle > 0)||(361 > data.cur
   Serial.print(lidar4.d);Serial.print(" ,");
 //  Serial.print("N:");
   Serial.print(angular_data.rot_count);Serial.print("\n");
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
