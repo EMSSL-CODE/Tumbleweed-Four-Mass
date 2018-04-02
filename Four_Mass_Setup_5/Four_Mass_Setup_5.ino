@@ -234,8 +234,12 @@ void setup()
 void loop()
 {
    IMU();
-   if (angular_data.curr_angle != 359.94)
-   {
+//   if ((angular_data.curr_angle) == 359.94)
+//   {
+//    Serial.print("ERROR");
+//   }
+//   else
+//   {
    read_lidars();        
            
    // gets and reads lidars
@@ -302,7 +306,7 @@ void loop()
    control_mass(pid4,lidar4,motor4);
    
    printfunc();
-   }
+//   }
 }
 // ********************************************************************************************************
 void init_motors()
@@ -871,6 +875,8 @@ void init_accelerometer()
 void IMU()
 {
 
+ imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
+
   sensors_event_t event;
   bno.getEvent(&event);
 //  double angDEG;
@@ -879,10 +885,15 @@ void IMU()
 
   // Print the orientation filter output
   float roll = event.orientation.z;
-
   // IMU Low Pass Filter
  // double ang = (1 - 0.3) * roll + 0.3 * ang;
-//
+ 
+  if (roll == -0.06)
+   {
+    Serial.print("ERROR");
+   }
+   else
+   {
  if (roll < 0)
   {
    roll = roll + 360;
@@ -892,10 +903,11 @@ void IMU()
 //  angDEG=ang;
 // }
 
-angular_data.curr_angle = roll;
+angular_data.curr_angle =roll;
 
  // angular_data.curr_angle = angDEG;
   calculate_angular_data(angular_data);
+   }
 }
 
 
