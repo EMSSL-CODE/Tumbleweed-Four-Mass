@@ -35,37 +35,41 @@ float temp_ang;
 // 43 - Blue     Motor 1
 // 35 - Red      Motor 3
 // 39 - Green    Motor 2
+// Pin 39 Fail
+// New pin for Motor 2 direction: 49
+// 
+
 
 int tempvar = 1;
 #define STEP_INT_MAX             330
 
 #define dir1                    (43)      //Direction
 #define stp1                    (37)      //Step
-#define EN1                     (46)      //Enable
-#define MS1_1                   (42)      //Finer Motor control
-#define MS2_1                   (48)      //Finer Motor control
-#define MS3_1                   (49)      //Finer Motor control
+//#define EN1                     (46)      //Enable
+//#define MS1_1                   (42)      //Finer Motor control
+//#define MS2_1                   (48)      //Finer Motor control
+//#define MS3_1                   (49)      //Finer Motor control
 //Motor 2
-#define dir2                    (39)
+#define dir2                    (49)
 #define stp2                    (22)
-#define EN2                     (23)
-#define MS1_2                   (24)
-#define MS2_2                   (25)
-#define MS3_2                   (26)
+//#define EN2                     (23)
+//#define MS1_2                   (24)
+//#define MS2_2                   (25)
+//#define MS3_2                   (26)
  // Motor 3
 #define dir3                    (35)
 #define stp3                    (27)
-#define EN3                     (29)
-#define MS1_3                   (31)     //////*****
-#define MS2_3                   (33)     //////****
-#define MS3_3                   (34)    /////****
+//#define EN3                     (29)
+//#define MS1_3                   (31)     //////*****
+//#define MS2_3                   (33)     //////****
+//#define MS3_3                   (34)    /////****
  // Motor 4
 #define dir4                    (41)
 #define stp4                    (42)
-#define EN4                     (36)
-#define MS1_4                   (38)  //////******
-#define MS2_4                   (44)
-#define MS3_4                   (40)
+//#define EN4                     (36)
+//#define MS1_4                   (38)  //////******
+//#define MS2_4                   (44)
+//#define MS3_4                   (40)
 
 
 // LIDAR Definitions
@@ -140,14 +144,14 @@ struct motorInfo
   int step_pin;
   int dir_val;     // dir high ==== clockwise
   int dir_pin;
-  int en_val;
-  int en_pin;
-  int MS1_val;
-  int MS1_pin;
-  int MS2_val;
-  int MS2_pin;
-  int MS3_val;
-  int MS3_pin;
+//  int en_val;
+//  int en_pin;
+//  int MS1_val;
+//  int MS1_pin;
+//  int MS2_val;
+//  int MS2_pin;
+//  int MS3_val;
+//  int MS3_pin;
   int step_interval;                 //(500 - step_interval) Microseconds
   int no;
 };
@@ -234,8 +238,12 @@ void setup()
 void loop()
 {
    IMU();
-   if (angular_data.curr_angle != 359.94)
-   {
+//   if ((angular_data.curr_angle) == 359.94)
+//   {
+//    Serial.print("ERROR");
+//   }
+//   else
+//   {
    read_lidars();        
            
    // gets and reads lidars
@@ -302,7 +310,7 @@ void loop()
    control_mass(pid4,lidar4,motor4);
    
    printfunc();
-   }
+//   }
 }
 // ********************************************************************************************************
 void init_motors()
@@ -310,31 +318,31 @@ void init_motors()
   // setup motor control pins
   pinMode(dir1, OUTPUT);
   pinMode(stp1, OUTPUT);
-  pinMode(EN1, OUTPUT);
-  pinMode(MS1_1, OUTPUT);
-  pinMode(MS2_1, OUTPUT);
-  pinMode(MS3_1, OUTPUT);
+//  pinMode(EN1, OUTPUT);
+//  pinMode(MS1_1, OUTPUT);
+//  pinMode(MS2_1, OUTPUT);
+//  pinMode(MS3_1, OUTPUT);
 
   pinMode(dir2, OUTPUT);
   pinMode(stp2, OUTPUT);
-  pinMode(EN2, OUTPUT);
-  pinMode(MS1_2, OUTPUT);
-  pinMode(MS2_2, OUTPUT);
-  pinMode(MS3_2, OUTPUT);
+//  pinMode(EN2, OUTPUT);
+//  pinMode(MS1_2, OUTPUT);
+//  pinMode(MS2_2, OUTPUT);
+//  pinMode(MS3_2, OUTPUT);
   
   pinMode(dir3, OUTPUT);
   pinMode(stp3, OUTPUT);
-  pinMode(EN3, OUTPUT);
-  pinMode(MS1_3, OUTPUT);
-  pinMode(MS2_3, OUTPUT);
-  pinMode(MS3_3, OUTPUT);
+//  pinMode(EN3, OUTPUT);
+//  pinMode(MS1_3, OUTPUT);
+//  pinMode(MS2_3, OUTPUT);
+//  pinMode(MS3_3, OUTPUT);
   
   pinMode(dir4, OUTPUT);
   pinMode(stp4, OUTPUT);
-  pinMode(EN4, OUTPUT);
-  pinMode(MS1_4, OUTPUT);
-  pinMode(MS2_4, OUTPUT);
-  pinMode(MS3_4, OUTPUT);
+//  pinMode(EN4, OUTPUT);
+//  pinMode(MS1_4, OUTPUT);
+//  pinMode(MS2_4, OUTPUT);
+//  pinMode(MS3_4, OUTPUT);
 
   resetBEDPins(); //Set step, direction, microstep and enable pins to default states
 
@@ -342,120 +350,120 @@ void init_motors()
   motor1.step_val = LOW;
   motor1.dir_pin  = dir1;
   motor1.dir_val  = HIGH;
-  motor1.en_val   = LOW;
-  motor1.en_pin   = EN1;
-  motor1.MS1_val  = LOW;
-  motor1.MS1_pin  = MS1_1;
-  motor1.MS2_val  = HIGH;
-  motor1.MS2_pin  = MS2_1;
-  motor1.MS3_val  = LOW;
-  motor1.MS3_pin  = MS3_1;
+//  motor1.en_val   = LOW;
+//  motor1.en_pin   = EN1;
+//  motor1.MS1_val  = LOW;
+//  motor1.MS1_pin  = MS1_1;
+//  motor1.MS2_val  = HIGH;
+//  motor1.MS2_pin  = MS2_1;
+//  motor1.MS3_val  = LOW;
+//  motor1.MS3_pin  = MS3_1;
   motor1.step_interval = 1;                            //(500 - step_interval) Microseconds
   motor1.no = 1; 
   
   digitalWrite(motor1.step_pin, motor1.step_val);
   digitalWrite(motor1.dir_pin, motor1.dir_val);
-  digitalWrite(motor1.en_pin, motor1.en_val);
-  digitalWrite(motor1.MS1_pin, motor1.MS1_val);
-  digitalWrite(motor1.MS2_pin, motor1.MS2_val);
-  digitalWrite(motor1.MS3_pin, motor1.MS3_val);
+//  digitalWrite(motor1.en_pin, motor1.en_val);
+//  digitalWrite(motor1.MS1_pin, motor1.MS1_val);
+//  digitalWrite(motor1.MS2_pin, motor1.MS2_val);
+//  digitalWrite(motor1.MS3_pin, motor1.MS3_val);
 
   motor2.step_pin = stp2;
   motor2.step_val = LOW;
   motor2.dir_pin  = dir2;
   motor2.dir_val  = HIGH;
-  motor2.en_val   = LOW;
-  motor2.en_pin   = EN2;
-  motor2.MS1_val  = LOW;
-  motor2.MS1_pin  = MS1_2;
-  motor2.MS2_val  = HIGH;
-  motor2.MS2_pin  = MS2_2;
-  motor2.MS3_val  = LOW;
-  motor2.MS3_pin  = MS3_2;
+//  motor2.en_val   = LOW;
+//  motor2.en_pin   = EN2;
+//  motor2.MS1_val  = LOW;
+//  motor2.MS1_pin  = MS1_2;
+//  motor2.MS2_val  = HIGH;
+//  motor2.MS2_pin  = MS2_2;
+//  motor2.MS3_val  = LOW;
+//  motor2.MS3_pin  = MS3_2;
   motor2.step_interval = 1;                              //(500 - step_interval) Microseconds
   motor2.no = 2; 
   
   digitalWrite(motor2.step_pin, motor2.step_val);
   digitalWrite(motor2.dir_pin, motor2.dir_val);
-  digitalWrite(motor2.en_pin, motor2.en_val);
-  digitalWrite(motor2.MS1_pin, motor2.MS1_val);
-  digitalWrite(motor2.MS2_pin, motor2.MS2_val);
-  digitalWrite(motor2.MS3_pin, motor2.MS3_val);
+//  digitalWrite(motor2.en_pin, motor2.en_val);
+//  digitalWrite(motor2.MS1_pin, motor2.MS1_val);
+//  digitalWrite(motor2.MS2_pin, motor2.MS2_val);
+//  digitalWrite(motor2.MS3_pin, motor2.MS3_val);
 
   motor3.step_pin = stp3;
   motor3.step_val = LOW;
   motor3.dir_pin  = dir3;
   motor3.dir_val  = HIGH;
-  motor3.en_val   = LOW;
-  motor3.en_pin   = EN3;
-  motor3.MS1_val  = LOW;
-  motor3.MS1_pin  = MS1_3;
-  motor3.MS2_val  = HIGH;
-  motor3.MS2_pin  = MS2_3;
-  motor3.MS3_val  = LOW;
-  motor3.MS3_pin  = MS3_3;
+//  motor3.en_val   = LOW;
+//  motor3.en_pin   = EN3;
+//  motor3.MS1_val  = LOW;
+//  motor3.MS1_pin  = MS1_3;
+//  motor3.MS2_val  = HIGH;
+//  motor3.MS2_pin  = MS2_3;
+//  motor3.MS3_val  = LOW;
+//  motor3.MS3_pin  = MS3_3;
   motor3.step_interval = 1;                               //(500 - step_interval) Microseconds
   motor3.no = 3; 
   
   digitalWrite(motor3.step_pin, motor3.step_val);
   digitalWrite(motor3.dir_pin, motor3.dir_val);
-  digitalWrite(motor3.en_pin, motor3.en_val);
-  digitalWrite(motor3.MS1_pin, motor3.MS1_val);
-  digitalWrite(motor3.MS2_pin, motor3.MS2_val);
-  digitalWrite(motor3.MS3_pin, motor3.MS3_val);
+//  digitalWrite(motor3.en_pin, motor3.en_val);
+//  digitalWrite(motor3.MS1_pin, motor3.MS1_val);
+//  digitalWrite(motor3.MS2_pin, motor3.MS2_val);
+//  digitalWrite(motor3.MS3_pin, motor3.MS3_val);
 
   motor4.step_pin = stp4;
   motor4.step_val = LOW;
   motor4.dir_pin  = dir4;
   motor4.dir_val  = HIGH;
-  motor4.en_val   = LOW;
-  motor4.en_pin   = EN4;
-  motor4.MS1_val  = LOW;
-  motor4.MS1_pin  = MS1_4;
-  motor4.MS2_val  = HIGH;
-  motor4.MS2_pin  = MS2_4;
-  motor4.MS3_val  = LOW;
-  motor4.MS3_pin  = MS3_4;
+//  motor4.en_val   = LOW;
+//  motor4.en_pin   = EN4;
+//  motor4.MS1_val  = LOW;
+//  motor4.MS1_pin  = MS1_4;
+//  motor4.MS2_val  = HIGH;
+//  motor4.MS2_pin  = MS2_4;
+//  motor4.MS3_val  = LOW;
+//  motor4.MS3_pin  = MS3_4;
   motor4.step_interval = 1;                                //(500 - step_interval) Microseconds
   motor4.no = 4; 
   
   digitalWrite(motor4.step_pin, motor4.step_val);
   digitalWrite(motor4.dir_pin, motor4.dir_val);
-  digitalWrite(motor4.en_pin, motor4.en_val);
-  digitalWrite(motor4.MS1_pin, motor4.MS1_val);
-  digitalWrite(motor4.MS2_pin, motor4.MS2_val);
-  digitalWrite(motor4.MS3_pin, motor4.MS3_val);
+//  digitalWrite(motor4.en_pin, motor4.en_val);
+//  digitalWrite(motor4.MS1_pin, motor4.MS1_val);
+//  digitalWrite(motor4.MS2_pin, motor4.MS2_val);
+//  digitalWrite(motor4.MS3_pin, motor4.MS3_val);
 }
 
 void resetBEDPins()
 {
   digitalWrite(stp1, LOW);
   digitalWrite(dir1, LOW);
-  digitalWrite(MS1_1, LOW);
-  digitalWrite(MS2_1, LOW);
-  digitalWrite(MS3_1, LOW);
-  digitalWrite(EN1, HIGH);
+//  digitalWrite(MS1_1, LOW);
+//  digitalWrite(MS2_1, LOW);
+//  digitalWrite(MS3_1, LOW);
+//  digitalWrite(EN1, HIGH);
   
   digitalWrite(stp2, LOW);
   digitalWrite(dir2, LOW);
-  digitalWrite(MS1_2, LOW);
-  digitalWrite(MS2_2, LOW);
-  digitalWrite(MS3_2, LOW);
-  digitalWrite(EN2, HIGH);
-  
+//  digitalWrite(MS1_2, LOW);
+//  digitalWrite(MS2_2, LOW);
+//  digitalWrite(MS3_2, LOW);
+//  digitalWrite(EN2, HIGH);
+//  
   digitalWrite(stp3, LOW);
   digitalWrite(dir3, LOW);
-  digitalWrite(MS1_3, LOW);
-  digitalWrite(MS2_3, LOW);
-  digitalWrite(MS3_3, LOW);
-  digitalWrite(EN3, HIGH);
+//  digitalWrite(MS1_3, LOW);
+//  digitalWrite(MS2_3, LOW);
+//  digitalWrite(MS3_3, LOW);
+//  digitalWrite(EN3, HIGH);
   
   digitalWrite(stp4, LOW);
   digitalWrite(dir4, LOW);
-  digitalWrite(MS1_4, LOW);
-  digitalWrite(MS2_4, LOW);
-  digitalWrite(MS3_4, LOW);
-  digitalWrite(EN4, HIGH);
+//  digitalWrite(MS1_4, LOW);
+//  digitalWrite(MS2_4, LOW);
+//  digitalWrite(MS3_4, LOW);
+//  digitalWrite(EN4, HIGH);
 }
 
 void init_lidars() 
@@ -871,6 +879,8 @@ void init_accelerometer()
 void IMU()
 {
 
+ imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
+
   sensors_event_t event;
   bno.getEvent(&event);
 //  double angDEG;
@@ -879,10 +889,15 @@ void IMU()
 
   // Print the orientation filter output
   float roll = event.orientation.z;
-
   // IMU Low Pass Filter
  // double ang = (1 - 0.3) * roll + 0.3 * ang;
-//
+ 
+  if (roll == -0.06)
+   {
+    Serial.print("ERROR");
+   }
+   else
+   {
  if (roll < 0)
   {
    roll = roll + 360;
@@ -892,10 +907,11 @@ void IMU()
 //  angDEG=ang;
 // }
 
-angular_data.curr_angle = roll;
+angular_data.curr_angle =roll;
 
  // angular_data.curr_angle = angDEG;
   calculate_angular_data(angular_data);
+   }
 }
 
 
@@ -1362,6 +1378,4 @@ if (((0 + CONE_WIDTH) > data.curr_angle && data.curr_angle > 0)||(361 > data.cur
 //  Serial.print("N:");
   Serial.print(angular_data.rot_count);Serial.print("\n");
 }
-
-
 
