@@ -1379,17 +1379,3 @@ if (((0 + CONE_WIDTH) > data.curr_angle && data.curr_angle > 0)||(361 > data.cur
   Serial.print(angular_data.rot_count);Serial.print("\n");
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
