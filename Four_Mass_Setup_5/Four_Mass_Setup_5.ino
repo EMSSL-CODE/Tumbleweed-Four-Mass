@@ -20,7 +20,7 @@ int k;
 float temp_ang;
 
 // Setpoint Angular Velocity
-#define SP_angvel                100.00f  // deg/s  (60 = 10rpm)  (90 = 15rpm)
+#define SP_angvel                150.00f  // deg/s  (60 = 10rpm)  (90 = 15rpm)
 
 // Controller Physical Constants
 //*******************************
@@ -1041,8 +1041,8 @@ void braking_setpoint_from_angle(pidInfo &pid1, pidInfo &pid2, pidInfo &pid3, pi
 //        pid1.kp=1;
 //        pid1.ki=0.0001;
 //        pid1.kd=0.0001;
-        pid1.sp = MAX_SETPOINT;
-        pid2.sp = MIN_SETPOINT;
+        pid1.sp = MIN_SETPOINT;
+        pid2.sp = MAX_SETPOINT;
         pid3.sp = MAX_SETPOINT; // assume pid1 is left motor and up
         pid4.sp = MIN_SETPOINT;
         pid1.i = 0;
@@ -1060,8 +1060,8 @@ if ((180 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (180 - CONE_WIDTH)
 //        pid1.kp=1;
 //        pid1.ki=0.0001;
 //        pid1.kd=0.0001;
-        pid1.sp = MIN_SETPOINT;
-        pid2.sp = MAX_SETPOINT;
+        pid1.sp = MAX_SETPOINT;
+        pid2.sp = MIN_SETPOINT;
         pid3.sp = MAX_SETPOINT; // assume pid1 is left motor and up
         pid4.sp = MIN_SETPOINT;
         pid1.i = 0;
@@ -1081,8 +1081,8 @@ if ((90 + CONE_WIDTH) > data.curr_angle && data.curr_angle > (90 - CONE_WIDTH))
 //        pid1.kp=1;                                  
 //        pid1.ki=0.0001;                                      
 //        pid1.kd=0.0001;                                   
-        pid1.sp = MIN_SETPOINT;
-        pid2.sp = MAX_SETPOINT;
+        pid1.sp = MAX_SETPOINT;
+        pid2.sp = MIN_SETPOINT;
         pid3.sp = MIN_SETPOINT; // assume pid1 is left motor and up
         pid4.sp = MAX_SETPOINT;
         pid1.i = 0;
@@ -1100,8 +1100,8 @@ if (((0 + CONE_WIDTH) > data.curr_angle && data.curr_angle > 0)||(361 > data.cur
 //        pid1.kp=1;                                  
 //        pid1.ki=0.0001;                                      
 //        pid1.kd=0.0001;                                   
-        pid1.sp = MAX_SETPOINT;
-        pid2.sp = MIN_SETPOINT;
+        pid1.sp = MIN_SETPOINT;
+        pid2.sp = MAX_SETPOINT;
         pid3.sp = MIN_SETPOINT; // assume pid1 is left motor and up
         pid4.sp = MAX_SETPOINT;
         pid1.i = 0;
