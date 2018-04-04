@@ -20,7 +20,7 @@ int k;
 float temp_ang;
 
 // Setpoint Angular Velocity
-#define SP_angvel                150.00f  // deg/s  (60 = 10rpm)  (90 = 15rpm)
+#define SP_angvel                20.00f  // deg/s  (60 = 10rpm)  (90 = 15rpm)
 
 // Controller Physical Constants
 //*******************************
@@ -251,16 +251,16 @@ void loop()
   // =======CASE 1: Start -> Accelerate -> 6(n) Rotations -> Brake -> Stop  
   //===================================== O N E ==================================// 
 
-  if (angular_data.rot_count < 10)  
-   {
-    // Acceleration
-    setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);  // Accelerates TW
-   }
-   if (angular_data.rot_count >= 10)
-   {
-    // Braking
-   braking_setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data); // Brakes TW and Stops
-   }
+//  if (angular_data.rot_count < 10)  
+//   {
+//    // Acceleration
+//    setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);  // Accelerates TW
+//   }
+//   if (angular_data.rot_count >= 10)
+//   {
+//    // Braking
+//   braking_setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data); // Brakes TW and Stops
+//   }
 
    //=========================================================================// 
 
@@ -272,23 +272,23 @@ void loop()
   // -> Stop after 10 revolutions 
   //===================================== T W O ==================================// 
 
-//  if ((angular_data.rot_count < 10)&&(angular_data.velocity <= SP_angvel))  // 
-//   {
-//    // Acceleration
-//    setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
-//   }
-//
-//   if ((angular_data.rot_count < 10)&&(angular_data.velocity > SP_angvel))  // 
-//   {
-//    // Brake Momentarily
-//    intermittent_braking_setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
-//   }
-//   
-//   if (angular_data.rot_count >= 10) 
-//   {
-//    // Brake and Stop
-//   braking_setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
-//   }
+  if ((angular_data.rot_count < 10)&&(angular_data.velocity <= SP_angvel))  // 
+   {
+    // Acceleration
+    setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
+   }
+
+   if ((angular_data.rot_count < 10)&&(angular_data.velocity > SP_angvel))  // 
+   {
+    // Brake Momentarily
+    intermittent_braking_setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
+   }
+   
+   if (angular_data.rot_count >= 10) 
+   {
+    // Brake and Stop
+   braking_setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);
+   }
 
    //=========================================================================// 
 
