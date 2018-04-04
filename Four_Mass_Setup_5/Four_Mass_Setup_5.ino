@@ -251,12 +251,12 @@ void loop()
   // =======CASE 1: Start -> Accelerate -> 6(n) Rotations -> Brake -> Stop  
   //===================================== O N E ==================================// 
 
-  if (angular_data.rot_count < 6)  
+  if (angular_data.rot_count < 10)  
    {
     // Acceleration
     setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data);  // Accelerates TW
    }
-   if (angular_data.rot_count >= 6)
+   if (angular_data.rot_count >= 10)
    {
     // Braking
    braking_setpoint_from_angle(pid1,pid2,pid3,pid4,angular_data); // Brakes TW and Stops
@@ -789,7 +789,7 @@ void calculate_angular_data(angleData &data)
   // old code 
   // data.velocity = 1000*(data.prev_angle - data.curr_angle)/((data.prev_time - data.curr_time));
   float vel = 1000*(data.prev_angle - data.curr_angle)/((data.prev_time - data.curr_time));
-  if (((data.prev_angle-data.curr_angle) > 0)&&(abs(data.curr_angle) > 345))
+  if (((data.prev_angle-data.curr_angle) > 0)&&(abs(data.curr_angle) > 355))
   {
     data.rot_count = data.rot_count + 1;
   }
