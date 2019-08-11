@@ -24,8 +24,8 @@ float temp_ang;
 
 
 
-#define test_case                1 
-#define SP_angvel                60.00f  		// Setpoint Angular Velocity
+#define test_case                3 
+#define SP_angvel                50.00f  		// Setpoint Angular Velocity
 #define velocity_source          1       		// 1 = calc from fused angle data        2 = raw gyro velocity
 #define K_const                  1.75f   		
 
