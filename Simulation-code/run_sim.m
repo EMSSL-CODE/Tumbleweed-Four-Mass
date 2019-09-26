@@ -10,12 +10,12 @@ SetDefaults
 
 % angular velocity sims
 bindir = 'Compares';
-paramfile = 'Compare_sp_70_ca_15_A';  % run 1, revB
+%paramfile = 'Compare_sp_70_ca_15_A';  % run 1, revB
 % paramfile = 'Compare_sp_70_ca_15_C';  % run 1, revC controlled
 % paramfile = 'Compare_sp_30_ca_5_A';  % run 2, revA
 % paramfile = 'Compare_sp_30_ca_5_B';  % run 2, revB
 % paramfile = 'Compare_sp_50_ca_20_A';  % run 3, revA
-% paramfile = 'Compare_sp_50_ca_20_B';  % run 3, revB
+ paramfile = 'Compare_sp_90_t1_B';  % run 3, revB
 
 % leave everything below this alone! -CDY
 % -----------------------------------------------------------------------
