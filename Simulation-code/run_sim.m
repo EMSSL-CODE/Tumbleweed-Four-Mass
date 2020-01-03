@@ -8,14 +8,54 @@ close all
 clear
 SetDefaults
 
+%% 1 Comparing Exp and Sim (Exp Mass Pos I/P for Sim O/P)
 % angular velocity sims
-bindir = 'Compares';
-% paramfile = 'Compare_sp_70_ca_15_A';  % run 1, revB
+%bindir = 'Compares';
+
+%paramfile = 'Compare_sp_70_ca_15_A';  % run 1, revB
 % paramfile = 'Compare_sp_70_ca_15_C';  % run 1, revC controlled
 % paramfile = 'Compare_sp_30_ca_5_A';  % run 2, revA
 % paramfile = 'Compare_sp_30_ca_5_B';  % run 2, revB
 % paramfile = 'Compare_sp_50_ca_20_A';  % run 3, revA
-% paramfile = 'Compare_sp_50_ca_20_B';  % run 3, revB
+% paramfile = 'Compare_sp_30_t1_B';  % run 3, revB
+%% 2  MM to CM Sims only
+%bindir = 'MM_CM_Sims';
+
+% paramfile = 'MMCM_p005_paramfile';
+% paramfile = 'MMCM_p010_paramfile';
+% paramfile = 'MMCM_p015_paramfile';
+% paramfile = 'MMCM_p020_paramfile';
+% paramfile = 'MMCM_p025_paramfile';
+% paramfile = 'MMCM_p030_paramfile';
+% paramfile = 'MMCM_p035_paramfile';
+% paramfile = 'MMCM_p040_paramfile';
+% paramfile = 'MMCM_p045_paramfile';
+% paramfile = 'MMCM_p050_paramfile';
+
+%% 3 Rover Size Sims
+
+%bindir = 'Rover_Size_Sims';
+
+% paramfile = 'Dia_1p00_paramfile';
+%  paramfile = 'Dia_1p25_paramfile';
+%  paramfile = 'Dia_1p50_paramfile';
+%  paramfile = 'Dia_1p75_paramfile';
+%  paramfile = 'Dia_2p00_paramfile';
+
+%% 4 Variable Setpoint Study
+
+% 4.a) Braking 
+
+% 4.b) Variable setpoint 
+
+bindir = 'Variable_SP';
+
+paramfile = 'Sine_Wave_T200';
+%y = 50*sin(2*pi*t/200);
+%y = 50*sin(2*pi*t/400);
+%y = 50*sin(2*pi*t/600);
+%y = 50*sin(2*pi*t/800);
+%y = 50*sin(2*pi*t/1000);
 
 % leave everything below this alone! -CDY
 % -----------------------------------------------------------------------
@@ -246,7 +286,17 @@ figure('Color', 'w');
 set(gcf, 'units', 'normalized');
 set(gcf, 'position', [0.0508    0.3634    0.7145    0.5104]);
 cntr = 1;
-subplot(1, 2, 1)
+
+%%
+figure('Color', 'w');
+set(gcf, 'units', 'inches');
+set(gcf, 'position', [0, 0, 3.8, 4.0]);                 % [xpos, ypos, width, height] ON SCREEN
+set(gcf, 'papersize', [3.8, 4.0]);                      % set pdf paper size
+set(gcf, 'paperposition', [0, 0, 3.8, 4.0]);    % position ON PAPER
+fs_legend = 10;
+fs_labels = 10;
+%%
+subplot(2, 1, 1)
 hold on
 if expFlag == 1
     plot(tme, acttta, '.');
@@ -269,13 +319,15 @@ end
 legend(lgnd1, 'location', 'northwest');
 
 
-subplot(1, 2, 2)
+subplot(2, 1, 2)
 cntr = 1;
 if expFlag == 1
     plot(tme, actttad, '.');
 end
 hold on
 plot(t, x(:, 2)*180/pi);
+hold on
+plot(t,A*sin(2*pi*t/T))
 xlabel('Time (s)');
 ylabel('Angle rate (deg/s)');
 grid on
@@ -286,6 +338,8 @@ if simcFlag == 1
     plot(simCdata(:, 1), simCdata(:, 3), '-');
 end
 % legend({'Data', 'Model'});
+
+%%
 saveas(gcf, [savename(1:end - 4), '_plot.fig']);
 saveas(gcf, [savename(1:end - 4), '_plot.jpg']);
 movefile([savename(1:end - 4), '_plot.fig'], bindir);
@@ -297,7 +351,7 @@ if simcFlag == 1
     figure('Color', 'w');
     set(gcf, 'units', 'normalized');
     set(gcf, 'position', [0.0508    0.3634    0.7145    0.5104]);
-    subplot(1, 2, 1)
+    subplot(2, 1, 1)
     hold on
     TV = linspace(0, tv(end), 201);
     E1 = interp1(tme, acttta, TV, 'method', 'extrap');
@@ -314,7 +368,7 @@ if simcFlag == 1
     set(gca, 'xtick', -200:25:200);
     
 
-    subplot(1, 2, 2)
+    subplot(2, 1, 2)
     hold on
     TV = linspace(0, tv(end), 201);
     E1 = interp1(tme, actttad, TV, 'method', 'extrap');
@@ -325,6 +379,7 @@ if simcFlag == 1
     xlabel('Time (s)');
     ylabel('Angle Rate Error (deg/s)');
     grid on
+
     set(gca, 'xtick', 0:20:100)
     ylim([-100, 100]);
     set(gca, 'xtick', -200:25:200);
