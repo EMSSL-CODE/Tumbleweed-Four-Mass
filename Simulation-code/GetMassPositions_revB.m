@@ -1,5 +1,5 @@
 function [r1, r2, r3, r4, r1d, r2d, r3d, r4d, r1dd, r2dd, r3dd, r4dd] = ...
-    GetMassPositions_revB(x, LL, UL, mv, t, sp, kP_vel, m, mT)
+    GetMassPositions_revB(x, LL, UL, mv, t, sp, kP_vel, m, mT, A, T, f_variable_sp, f_braking_sim, time_of_braking)
 
 % Function to get mass positions, velocities, and accelerations.
 % CDY
@@ -16,6 +16,13 @@ function [r1, r2, r3, r4, r1d, r2d, r3d, r4d, r1dd, r2dd, r3dd, r4dd] = ...
     y3d = 0;         % m/s
     y4d = 0;         % m/s
     
+    if f_variable_sp == 1
+        sp = A*sin(2*pi*t/T);
+    end
+    
+    if f_braking_sim ==1 && t >= time_of_braking
+        sp = 0;
+    end
 %     % -----------------------------------------------------------------
 %     % Cone Angle Code for set points - commented out in revB
 %     % -----------------------------------------------------------------
