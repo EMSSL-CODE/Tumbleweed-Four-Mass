@@ -46,11 +46,24 @@ SetDefaults
 
 % 4.a) Braking 
 
+bindir = 'Braking';
+
+% paramfile = 'braking_SP_30_paramfile';
+% paramfile = 'braking_SP_40_paramfile';
+% paramfile = 'braking_SP_50_paramfile';
+% paramfile = 'braking_SP_60_paramfile';
+% paramfile = 'braking_SP_70_paramfile';
+% paramfile = 'braking_SP_80_paramfile';
+% paramfile = 'braking_SP_90_paramfile';
+ paramfile = 'braking_SP_100_paramfile';
+
+
+
 % 4.b) Variable setpoint 
 
-bindir = 'Variable_SP';
-
-paramfile = 'Sine_Wave_T200';
+% bindir = 'Variable_SP';
+% 
+% paramfile = 'Sine_Wave_T200';
 %y = 50*sin(2*pi*t/200);
 %y = 50*sin(2*pi*t/400);
 %y = 50*sin(2*pi*t/600);
@@ -307,7 +320,9 @@ plot(t, x(:, 1)*180/pi);
 xlabel('Time (s)');
 ylabel('Angle (deg)');
 grid on
-set(gca, 'xtick', 0:20:100)
+% set(gca, 'xtick', 0:20:400)
+% set(gca, 'ytick', 0:20:120)
+
 lgnd1{cntr} = 'Frict sim';
 cntr = cntr + 1;
 if simcFlag == 1
@@ -317,7 +332,8 @@ if simcFlag == 1
 end
 % legend({'Exp. Data', 'Frict. sim', 'c*ttad sim'}, 'location', 'northwest');
 legend(lgnd1, 'location', 'northwest');
-
+xlim([0 400])
+box on
 
 subplot(2, 1, 2)
 cntr = 1;
@@ -327,13 +343,27 @@ end
 hold on
 plot(t, x(:, 2)*180/pi);
 hold on
-plot(t,A*sin(2*pi*t/T))
+temp_y = 0;
+for tmp = 1:length(t)
+    if t(tmp)>=time_of_braking
+        temp_y(tmp) = 0;
+    else
+        temp_y(tmp) = sp;
+    end
+end
+
+% plot(t,A*sin(2*pi*t/T))
+plot(t,temp_y,'r')
+legend ('Frict sim','Setpoint')
 xlabel('Time (s)');
 ylabel('Angle rate (deg/s)');
 grid on
 % ylim([0, 100]);
-% set(gca, 'xtick', 0:20:100)
-% set(gca, 'ytick', 0:20:100)
+%  set(gca, 'xtick', 0:20:400)
+ set(gca, 'ytick', 0:20:120)
+xlim([0 400])
+ylim([-10 120])
+box on
 if simcFlag == 1
     plot(simCdata(:, 1), simCdata(:, 3), '-');
 end
