@@ -78,9 +78,28 @@ bindir = 'Braking';
 %
 
 bindir = 'massvar';
-paramfile = 'massvel_01p00mps';
+% paramfile = 'massvel_01p00mps';
+% paramfile = 'massvel_0p10mps';
+% paramfile = 'massvel_0p20mps';
+% paramfile = 'massvel_0p30mps';
+% paramfile = 'massvel_0p40mps';
+% paramfile = 'massvel_0p50mps';
+% paramfile = 'massvel_0p05mps';
+% paramfile = 'massvel_0p15mps';
+paramfile = 'massvel_0p25mps';
+% paramfile = 'massvel_0p35mps';
+% paramfile = 'massvel_0p45mps';
+% paramfile = 'massvel_0p55mps';
+% paramfile = 'massvel_0p60mps';
+% paramfile = 'massvel_0p65mps';
 
-
+% paramfile = 'mv_0p30mps_oa180';
+% paramfile = 'mv_0p30mps_oa165';
+% paramfile = 'mv_0p30mps_oa150';
+% paramfile = 'mv_0p30mps_oa135';
+% paramfile = 'mv_0p30mps_oa120';
+% paramfile = 'mv_0p30mps_oa105';
+% paramfile = 'mv_0p30mps_oa90';
 
 % leave everything below this alone! -CDY
 % -----------------------------------------------------------------------
@@ -197,7 +216,8 @@ ma = wrk;
 pwrs = wrk;
 
 for j1 = 1:length(t)
-    dxdt = odefunc_revA(t(j1), x(j1, :), exp2_fca_40, paramfile, outflag);
+    % dxdt = odefunc_revA(t(j1), x(j1, :), exp2_fca_40, paramfile, outflag);
+    dxdt = odefunct(t(j1), x(j1, :), exp2_fca_40, paramfile, outflag);
     
     Ff(j1) = dxdt.Ff;
     N(j1) = dxdt.N;
@@ -275,6 +295,7 @@ xlabel('Time (s)');
 ylabel('Mass pos (m)');
 grid on
 legend({'1', '2', '3', '4'});
+% xlim([0, 60]);
 saveas(gcf, [savename(1:end - 4), '_mass.fig']);
 saveas(gcf, [savename(1:end - 4), '_mass.jpg']);
 movefile([savename(1:end - 4), '_mass.fig'], bindir);
@@ -289,6 +310,7 @@ plot(t, vel(:, 2));
 plot(t, vel(:, 3));
 plot(t, vel(:, 4));
 xlabel('Time (s)');
+% xlim([0, 60]);
 ylabel('Mass vel (m/s)');
 grid on
 legend({'1', '2', '3', '4'});
@@ -307,10 +329,10 @@ legend({'1', '2', '3', '4'});
 % keyboard
 % eval('MakeMovie');
 
-% make plot to compare
-figure('Color', 'w');
-set(gcf, 'units', 'normalized');
-set(gcf, 'position', [0.0508    0.3634    0.7145    0.5104]);
+% % make plot to compare
+% figure('Color', 'w');
+% set(gcf, 'units', 'normalized');
+% set(gcf, 'position', [0.0508    0.3634    0.7145    0.5104]);
 cntr = 1;
 
 %%
@@ -346,6 +368,7 @@ end
 % legend({'Exp. Data', 'Frict. sim', 'c*ttad sim'}, 'location', 'northwest');
 legend(lgnd1, 'location', 'northwest');
 xlim([0 400])
+% xlim([0, 60]);
 box on
 
 subplot(2, 1, 2)
@@ -375,6 +398,7 @@ grid on
 %  set(gca, 'xtick', 0:20:400)
  set(gca, 'ytick', 0:20:120)
 xlim([0 400])
+% xlim([0, 60]);
 ylim([-10 120])
 box on
 if simcFlag == 1
@@ -409,6 +433,7 @@ if simcFlag == 1
     set(gca, 'xtick', 0:20:100);
     ylim([-200, 200]);
     set(gca, 'xtick', -200:25:200);
+    % xlim([0, 60]);
     
 
     subplot(2, 1, 2)
@@ -425,6 +450,7 @@ if simcFlag == 1
 
     set(gca, 'xtick', 0:20:100)
     ylim([-100, 100]);
+    % xlim([0, 60]);
     set(gca, 'xtick', -200:25:200);
     legend({'Exp - Frict. sim', 'Exp - c*ttad sim', 'abs(Exp - Frict. sim)', ...
         'abs(Exp - c*ttad sim)'}, 'location', 'southeast');

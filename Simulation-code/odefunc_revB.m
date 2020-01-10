@@ -55,8 +55,15 @@ if strcmp(massFlag, 'sim') == 1
         [x1, x2, y3, y4, x1d, x2d, y3d, y4d, x1dd, x2dd, y3dd, y4dd] = ...
             GetMassPositions_revB(x, LL, UL, mv, t, sp, kP_vel, m, mT, ...
             A, T, f_variable_sp, f_braking_sim, time_of_braking);
+    
+    elseif strcmp(massfunct, 'revC') == 1
+        mT = m1 + m2 + m3 + m4 + mCH;
+        [x1, x2, y3, y4, x1d, x2d, y3d, y4d, x1dd, x2dd, y3dd, y4dd] = ...
+            GetMassPositions_revC(x, LL, UL, mv, t, sp, kP_vel, m, mT, ...
+            A, T, f_variable_sp, f_braking_sim, time_of_braking, offang);
+    
     else
-        error('Please specify massfunct as either revA or revB.');
+        error('Please specify massfunct as either revA, revB, or revC.');
     end
     
 else
