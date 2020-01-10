@@ -183,7 +183,7 @@ function [r1, r2, r3, r4, r1d, r2d, r3d, r4d, r1dd, r2dd, r3dd, r4dd] = ...
     x2SP = x1 - D;
     y4SP = y3 - D;
     
-    
+    % (-(mT*ttad(i1)*yCM*sin(ttav))./(2*m))
     
     % -----------------------------------------------------------------
     % low level control and mass velocity restrictions for masses

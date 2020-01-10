@@ -70,6 +70,18 @@ bindir = 'Braking';
 %y = 50*sin(2*pi*t/800);
 %y = 50*sin(2*pi*t/1000);
 
+
+%% 5 maximum mass velocity study
+% Christopher D. Yoder
+% 2020-01-09
+% I forgot how to run this code. We should write a readme :/
+%
+
+bindir = 'massvar';
+paramfile = 'massvel_01p00mps';
+
+
+
 % leave everything below this alone! -CDY
 % -----------------------------------------------------------------------
 
@@ -156,6 +168,7 @@ switch use_ode
             paramfile, outflag), tv, initialz, opts);
     case 'ode5'
         tv = ts:dt:tf;
+        % keyboard
         x = ode5(@(tt, xx)odefunct(tt, xx, exp2_fca_40, ...
             paramfile, outflag), tv, initialz);
         t = tv;
@@ -269,16 +282,16 @@ movefile([savename(1:end - 4), '_mass.jpg'], bindir);
 
 
 
-% figure('Color', 'w');
-% hold on
-% plot(t, vel(:, 1));
-% plot(t, vel(:, 2));
-% plot(t, vel(:, 3));
-% plot(t, vel(:, 4));
-% xlabel('Time (s)');
-% ylabel('Mass vel (m/s)');
-% grid on
-% legend({'1', '2', '3', '4'});
+figure('Color', 'w');
+hold on
+plot(t, vel(:, 1));
+plot(t, vel(:, 2));
+plot(t, vel(:, 3));
+plot(t, vel(:, 4));
+xlabel('Time (s)');
+ylabel('Mass vel (m/s)');
+grid on
+legend({'1', '2', '3', '4'});
 % 
 % figure('Color', 'w');
 % hold on
