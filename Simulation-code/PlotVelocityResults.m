@@ -15,7 +15,7 @@ set(groot, 'defaultLegendInterpreter', 'latex');
 set(groot, 'defaultPolaraxesTickLabelInterpreter', 'latex');
 set(groot, 'defaultTextInterpreter', 'latex');
 pp = [0, 0, 3, 3];
-fs = 6;
+fs = 8;
 set(groot, 'defaultFigureUnits', 'inches');
 mrkrs = {'o', '^', '*', 'v', '.', '<', 's', '>', 'd', ...
     'o', '^', '*', 'v', '.', '<', 's', '>', 'd'};
