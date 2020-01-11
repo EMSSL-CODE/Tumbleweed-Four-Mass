@@ -14,6 +14,9 @@ set(groot, 'defaultGraphplotInterpreter', 'latex');
 set(groot, 'defaultLegendInterpreter', 'latex');
 set(groot, 'defaultPolaraxesTickLabelInterpreter', 'latex');
 set(groot, 'defaultTextInterpreter', 'latex');
+pp = [0, 0, 3, 3];
+fs = 6;
+set(groot, 'defaultFigureUnits', 'inches');
 mrkrs = {'o', '^', '*', 'v', '.', '<', 's', '>', 'd', ...
     'o', '^', '*', 'v', '.', '<', 's', '>', 'd'};
 
@@ -35,10 +38,23 @@ bindir = 'massvar';
 
 % load and plot
 f1 = figure;    % history
+set(gcf, 'PaperUnits', 'inches');
+set(gcf, 'PaperSize', pp(3:4));
+set(gcf, 'PaperPosition', pp);
+set(gcf, 'Position', pp);
 f2 = figure;    % final velocity
+set(gcf, 'PaperSize', pp(3:4));
+set(gcf, 'PaperPosition', pp);
+set(gcf, 'Position', pp);
 f3 = figure;    % rise time
+set(gcf, 'PaperSize', pp(3:4));
+set(gcf, 'PaperPosition', pp);
+set(gcf, 'Position', pp);
 f4 = figure;    % settling time
-f5 = figure;
+set(gcf, 'PaperSize', pp(3:4));
+set(gcf, 'PaperPosition', pp);
+set(gcf, 'Position', pp);
+% f5 = figure;
 
 mvv = NaN(length(runfiles), 1); 
 fsv = mvv;
@@ -57,7 +73,8 @@ for i1 = 1:length(runfiles)
     figure(f1)
     hold on
     plot(s1.tme, s1.x(:, 2)*180/pi)
-    lgnd{i1} = sprintf('mv = %0.2f [m/s]', mvv(i1));
+    % lgnd{i1} = sprintf('mv = %0.2f [m/s]', mvv(i1));
+    lgnd{i1} = sprintf('%0.2f [m/s]', mvv(i1));
     
     % plot final velocity
     angvel = mean(s1.x(end-100:end, 2));    % get average final velocity
@@ -76,7 +93,15 @@ hold on
 xlabel('Time [s]');
 ylabel('Rover speed [deg/s]');
 grid on
-legend(lgnd, 'location', 'northwest');
+legend(lgnd, 'location', 'southeast');
+set(gca, 'FontSize', fs);
+savefig(gcf, 'AngVel-vs-time.fig');
+print('AngVel-vs-time', '-dpdf');
+print('AngVel-vs-time', '-dpng');
+% keyboard
+
+
+
 
 figure(f2);
 hold on
@@ -85,6 +110,7 @@ xlabel('Mass velocity [m/s]');
 ylabel('Rover speed [deg/s]');
 grid on
 % legend(lgnd);
+set(gca, 'FontSize', fs);
 
 figure(f3);
 hold on
@@ -93,6 +119,7 @@ xlabel('Mass velocity [m/s]');
 ylabel('Rover rise time [s]');
 grid on
 % legend(lgnd);
+set(gca, 'FontSize', fs);
 
 figure(f4);
 hold on
@@ -101,3 +128,4 @@ xlabel('Mass velocity [m/s]');
 ylabel('Rover settling time [s]');
 grid on
 % legend(lgnd);
+set(gca, 'FontSize', fs);
