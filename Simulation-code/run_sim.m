@@ -101,6 +101,23 @@ paramfile = 'massvel_0p25mps';
 % paramfile = 'mv_0p30mps_oa105';
 % paramfile = 'mv_0p30mps_oa90';
 
+%% 6 Crr study
+bindir = 'Crr';
+% paramfile = 'crr_2';            % Crr = 0.005; Ewdin hard ground
+% paramfile = 'crr_3';            % Crr = 0.05; Ewdin middle
+% paramfile = 'crr_4';            % Crr = 0.1; Ewdin middle
+
+% paramfile = 'crr_12';               % crr = 0.0001
+% paramfile = 'crr_11';               % crr = 0.0005
+% paramfile = 'crr_5';              % Crr = 0.001; Less
+% paramfile = 'crr_1';              % Crr = 0.002 = Crr0
+% paramfile = 'crr_6';              % Crr = 0.003; Less
+% paramfile = 'crr_7';            % Crr = 0.004; Less
+% paramfile = 'crr_8';            % Crr = 0.005; Less
+% paramfile = 'crr_9';            % Crr = 0.006; Less
+% paramfile = 'crr_10';            % Crr = 0.007; Less
+
+
 % leave everything below this alone! -CDY
 % -----------------------------------------------------------------------
 
