@@ -22,15 +22,16 @@ mrkrs = {'o', '^', '*', 'v', '.', '<', 's', '>', 'd', ...
 
 % filenames
 runfiles = {'crr_12';
-    % 'crr_11';
+    'crr_11';
     'crr_5';
+    'crr_13';
     'crr_1';
+    'crr_14';
     'crr_6';
+    'crr_15';
     'crr_7';
+    'crr_16';
     'crr_8'};
-    % 'massvel_0p55mps';
-    % 'massvel_0p60mps';
-    % 'massvel_0p65mps'};
 bindir = 'crr';
 
 % load and plot
@@ -70,6 +71,7 @@ for i1 = 1:length(runfiles)
     % plot history
     figure(f1)
     hold on
+    subplot(1, 2, 1)
     plot(s1.tme, s1.x(:, 2)*180/pi)
     % lgnd{i1} = sprintf('mv = %0.2f [m/s]', mvv(i1));
     % lgnd{i1} = sprintf('%0.2f [m/s]', mvv(i1));
@@ -88,6 +90,7 @@ for i1 = 1:length(runfiles)
 end
 
 figure(f1);
+subplot(1, 2, 1)
 hold on
 xlabel('Time [s]');
 ylabel('Rover speed [deg/s]');
@@ -98,6 +101,24 @@ set(gca, 'FontSize', fs);
 % print('AngVel-vs-time', '-dpdf');
 % print('AngVel-vs-time', '-dpng');
 % keyboard
+
+subplot(1, 2, 2)
+% set(gcf, 'PaperUnits', 'inches');
+% set(gcf, 'PaperSize', pp(3:4));
+% set(gcf, 'PaperPosition', pp);
+% set(gcf, 'Position', pp);
+hold on
+yyaxis left
+plot(mvv, fsv*180/pi, '-o');
+ylim([0, 200])
+xlabel('Crr');
+ylabel('Rover speed [deg/s]');
+grid on
+yyaxis right
+plot(mvv, rtv, '-s');
+ylabel('Rover rise time [s]');
+legend({'Rover Speed', 'Rover Rise Time'}, 'location', 'northeast');
+set(gca, 'FontSize', fs);
 
 
 
@@ -129,19 +150,4 @@ grid on
 % legend(lgnd);
 set(gca, 'FontSize', fs);
 
-figure;
-set(gcf, 'PaperUnits', 'inches');
-set(gcf, 'PaperSize', pp(3:4));
-set(gcf, 'PaperPosition', pp);
-set(gcf, 'Position', pp);
-hold on
-yyaxis left
-plot(mvv, fsv*180/pi, '-o');
-xlabel('Crr');
-ylabel('Rover speed [deg/s]');
-grid on
-yyaxis right
-plot(mvv, rtv, '-s');
-ylabel('Rover rise time [s]');
-legend({'Rover Speed', 'Rover Rise Time'}, 'location', 'northeast');
-set(gca, 'FontSize', fs);
+

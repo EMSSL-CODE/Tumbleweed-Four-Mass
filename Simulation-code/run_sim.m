@@ -107,15 +107,23 @@ bindir = 'Crr';
 % paramfile = 'crr_3';            % Crr = 0.05; Ewdin middle
 % paramfile = 'crr_4';            % Crr = 0.1; Ewdin middle
 
-% paramfile = 'crr_12';               % crr = 0.0001
-% paramfile = 'crr_11';               % crr = 0.0005
-% paramfile = 'crr_5';              % Crr = 0.001; Less
-% paramfile = 'crr_1';              % Crr = 0.002 = Crr0
-% paramfile = 'crr_6';              % Crr = 0.003; Less
-% paramfile = 'crr_7';            % Crr = 0.004; Less
-% paramfile = 'crr_8';            % Crr = 0.005; Less
+
+
 % paramfile = 'crr_9';            % Crr = 0.006; Less
 % paramfile = 'crr_10';            % Crr = 0.007; Less
+
+% paramfile = 'crr_12';             % crr = 0.0001
+% paramfile = 'crr_11';               % crr = 0.0005
+% paramfile = 'crr_5';              % Crr = 0.0010; Less
+% paramfile = 'crr_13';              % crr = 0.0015
+% paramfile = 'crr_1';              % Crr = 0.0020 = Crr0
+% paramfile = 'crr_14';              % crr = 0.0025
+% paramfile = 'crr_6';              % Crr = 0.0030; Less
+% paramfile = 'crr_15';              % crr = 0.0035
+% paramfile = 'crr_7';              % Crr = 0.0040; Less
+paramfile = 'crr_16';              % crr = 0.0045
+% paramfile = 'crr_8';                % Crr = 0.0050; Less
+
 
 
 % leave everything below this alone! -CDY
@@ -130,6 +138,9 @@ end
 expCname = 'NaN';
 eval(paramfile);                % load parameters to script workspace
 tv = ts:dt:tf;                  % create time vector
+
+% savename
+% keyboard
 
 % set exp vs sim
 expFlag = 0;
@@ -475,6 +486,8 @@ if simcFlag == 1
 end
 saveas(gcf, [savename(1:end - 4), '_plot.fig']);
 saveas(gcf, [savename(1:end - 4), '_error.jpg']);
+
+
 movefile([savename(1:end - 4), '_plot.fig'], bindir);
 movefile([savename(1:end - 4), '_error.jpg'], bindir);
 

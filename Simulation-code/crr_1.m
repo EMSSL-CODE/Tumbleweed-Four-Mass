@@ -34,7 +34,7 @@ use_ode     = 'ode5';       % use ode5 for sim
 odefunct    = @odefunc_revB;
 dt          = 0.1;               % s, time step for reporting (or sim if using fixed step)
 ts          = 0; %5.15 works for 50_t1 % 2 and 2.5 
-tf          = 400;
+tf          = 1000;
 mm          = (UL + LL)/2;
 ics         = [1, 0, UL, -LL, UL, -LL];  % [deg, deg/s, m, m, m, m] theta and theta dot initial conditions
 % new bits for the kinematic stuff
