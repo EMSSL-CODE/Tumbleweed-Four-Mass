@@ -151,3 +151,90 @@ grid on
 set(gca, 'FontSize', fs);
 
 
+figure
+set(gcf, 'PaperUnits', 'inches');
+set(gcf, 'PaperSize', pp(3:4));
+set(gcf, 'PaperPosition', pp);
+set(gcf, 'Position', pp);
+hold on
+yyaxis left
+plot(mvv, fsv*180/pi, '-o');
+ylim([0, 200])
+xlim([-0.00001, 0.00501]);
+set(gca, 'YTick', 0:25:200);
+xlabel('Crr');
+ylabel('Rover speed [deg/s]');
+grid on
+yyaxis right
+plot(mvv, rtv, '-s');
+ylim([75, 275]);
+set(gca, 'YTick', 75:25:275);
+ylabel('Rover rise time [s]');
+legend({'Rover Speed', 'Rover Rise Time'}, 'location', 'northeast');
+set(gca, 'FontSize', fs);
+savefig(gcf, 'Speed-RiseTime-Crr.fig');
+print('Speed-RiseTime-Crr', '-dpdf');
+print('Speed-RiseTime-Crr', '-dpng');
+
+
+% % % % %
+close all
+% Make normal force plot for later
+paramfile = 'crr_1';
+eval(paramfile);
+s1 = load(fullfile(bindir, savename));
+s2 = s1.x(:, 1)/(2*pi); % angle in the form of # of rotations
+s3 = sum(s2 <= floor(s2(end) - 2)) - 3; % last two full rotations
+tta_rot = s2(s3:end, 1);
+% m1_rot = s1.x(s3:end, 3);
+N_rot = s1.N(s3:end);
+rotq = ceil(tta_rot(1)):0.005:ceil(tta_rot(1)) + 2;
+m1 = interp1(tta_rot, s1.x(s3:end, 3), rotq, 'spline');
+m3 = interp1(tta_rot, s1.x(s3:end, 5), rotq, 'spline');
+Nq = interp1(tta_rot, N_rot, rotq, 'spline');
+rotq = (rotq - rotq(1))*360;    % convert from rotation to degrees
+xlz = [0, 360];
+% rotq = (rotq)*360;
+% xlz = rotq(1)*[1, 1] + [0, 360]; 
+% keyboard
+
+
+figure
+set(gcf, 'PaperUnits', 'inches');
+set(gcf, 'PaperSize', pp(3:4));
+set(gcf, 'PaperPosition', pp);
+set(gcf, 'Position', pp);
+hold on
+% plot(s1.t, s1.N)
+yyaxis left
+% plot(s1.x(:, 1)*180/pi, s1.N)
+% xlz = s1.x(end, 1)*180/pi + [-360, 0];
+plot(rotq, Nq)
+% ylim([208.94, 209.20])
+
+% xlz = [0, 360*1];
+xlim(xlz);    % plot last two full revolutions
+xlabel('Angle [deg]');
+ylabel('Normal force [N]');
+grid on
+ylim([208.90, 209.15]);
+yyaxis right
+% add mass positon for m1
+hold on
+% plot(s1.x(:, 1)*180/pi, s1.x(:, 3));
+plot(rotq, m1)
+plot(rotq, m3)
+ylabel('Mass position [m]');
+grid on
+xlim(xlz);
+ylz = [0.20, 0.60];
+set(gca, 'XTick', 0:60:360);
+ylim(ylz);
+set(gca, 'YTick', linspace(ylz(1), ylz(2), 6));
+h1 = legend({'Normal force', 'Mass 1', 'Mass 3'}, 'location', 'northeast');
+set(gcf, 'position', [10.8512    3.3095    3.0000    3.0000]);
+set(h1, 'position', [0.4594    0.7438    0.3898    0.1524]);
+set(gca, 'FontSize', fs);
+savefig(gcf, 'N-ang-nom.fig');
+print('N-ang-nom', '-dpdf');
+print('N-ang-nom', '-dpng');
